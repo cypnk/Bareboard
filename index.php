@@ -12043,20 +12043,64 @@ function doEditPostRoute( string $event, array $hook, array $params ) {
 	send( 200, 'Process edit post page' );
 }
 
-// TODO: User profile self-edit page
+// User profile self-edit page
 function showProfileRoute( string $event, array $hook, array $params ) {
-	$user = verifyAuthLevel( \USER_STATUS_APPROVED );
+	$user	= verifyAuthLevel( \USER_STATUS_APPROVED );
+	$data	= 
+	getSingle( 
+		$user['id'], 
+		"SELECT id, display, bio FROM users WHERE id = :id",
+		\FORUM_DATA
+	);
 	
-	// profilePage()
+	// No profile? Maybe deleted without unsetting session
+	if ( empty( $data ) ) {
+		sendNotFound();
+	}
 	
-	send( 200, 'Editing profile page' );
+	send( 
+		200, 
+		profilePage( 
+			$user['id'], 
+			$user['name'], 
+			$data['display']	?? '', 
+			$data['bio']		?? ''
+		)
+	);
 }
 
-// TODO: Edit user profile
+// Edit user profile
 function doEditProfileRoute( string $event, array $hook, array $params ) {
-	$user = verifyAuthLevel( \USER_STATUS_APPROVED );
+	$user	= verifyAuthLevel( \USER_STATUS_APPROVED );
 	
-	send( 200, 'Profile edit' );
+	$status = \FORM_STATUS_VALID;
+	$data	= profileForm( $user['id'], $status );
+	if ( $status != \FORM_STATUS_VALID || empty( $data ) ) {
+		sendExpired();
+	}
+	
+	$ok	= 
+	setUpdate( 
+		"UPDATE users SET 
+			display = :display, 
+			bio	= :bio
+			WHERE id = :id", 
+		[ 
+			':display'	=> $data['display']	?? '', 
+			':bio'		=> $data['bio']		?? '', 
+			':id'		=> $id 
+		], 
+		\FORUM_DATA
+	)
+	
+	if ( !$ok ) {
+		sendExpired();
+	}
+	
+	$path = 
+	strstr( eventRoutePrefix( 'showuser', 'showuser' ), ':', true );
+	
+	redirect( 202, slashPath( $path, true ) . $user['name'] );
 }
 
 // TODO: Public user profile page
@@ -12073,11 +12117,29 @@ function showPassRoute( string $event, array $hook, array $params ) {
 	send( 200, changePassPage( $user['id'] ) );
 }
 
-// TODO: Process password change
+// Process password change
 function doEditPassRoute( string $event, array $hook, array $params ) {
 	$user	= verifyAuthLevel( \USER_STATUS_APPROVED );
 	
-	send( 200, 'Change password' );
+	$status = \FORM_STATUS_VALID;
+	$data	= profileForm( $user['id'], $status );
+	if ( $status != \FORM_STATUS_VALID || empty( $data ) ) {
+		sendExpired();
+	}
+	
+	// Check old password validity first
+	$creds	= passwordAuth( $user['id'], $data['old_password'] );
+	if ( $creds != \AUTH_STATUS_SUCCESS ) {
+		sendDenied();
+	}
+	
+	// Save new password
+	if ( savePassword( $user['id'], $data['new_password'] ) ) {
+		sendPage( '', 202 );
+	}
+	
+	// Something went wrong
+	sendExpired();
 }
 
 // Authentication page
@@ -12334,7 +12396,7 @@ function addForumRoutes( string $event, array $hook, array $params ) {
 	[ 'post', 'user/profile',		'doeditprofile' ],
 	
 	[ 'get', 'user/password',		'editpassword' ],
-	[ 'post', 'user/password',		'dopassword' ],
+	[ 'post', 'user/password',		'doeditpassword' ],
 	
 	[ 'get', 'login',			'showlogin' ],
 	[ 'get', 'login/:all',			'showlogin' ],
@@ -12432,6 +12494,9 @@ hook( [ 'doeditconfig',	'doEditSettingsRoute' ] );
 hook( [ 'showuser',	'showUserRoute' ] );
 hook( [ 'editprofile',	'showEditProfileRoute' ] );
 hook( [ 'doeditprofile','doEditProfileRoute' ] );
+
+hook( [ 'editpassword',	'showPassRoute' ] );
+hook( [ 'doeditpassword','doEditPassRoute' ] );
 
 // Searching routes
 hook( [ 'showsearch',	'searchRoute' ] );
