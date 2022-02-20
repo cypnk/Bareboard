@@ -1,0 +1,106 @@
+{
+	"date_nice"	: "l, F j, Y",
+	"headings"	: {
+		"related"	: "Related", 
+		"siblings"	: "Also in this forum",
+		"readtime"	: "{time} minute read"
+	}, 
+	"forms"		: {
+		"search"	: {
+			"placeholder"	: "Find posts by title or body",
+			"label"		: "Search",
+			"button"	: "Go"
+		},
+		"login"		: {
+			"page"		: "Login",
+			"name"		: "Name <span>(required)<\/span>",
+			"namedesc"	: "Between {name_min} and {name_max} characters. Letters, numbers, and spaces supported.",
+			"pass"		: "Password <span>(required)<\/span>",
+			"passdesc"	: "Minimum {pass_min} characters.",
+			"rem"		: "Remember me",
+			"submit"	: "Login"
+		},
+		"register"	: {
+			"page"		: "Register",
+			"name"		: "Name <span>(required)<\/span>",
+			"namedesc"	: "Between {name_min} and {name_max} characters. Letters, numbers, and spaces supported.",
+			"pass"		: "Password <span>(required)<\/span>",
+			"passdesc"	: "Minimum {pass_min} characters.",
+			"repeat"	: "Repeat password <span>(required)<\/span>",
+			"repeatdesc"	: "Must match password entered above",
+			"rem"		: "Remember me",
+			"terms"		: "Agree to the <a href=\"{terms}\" target=\"_blank\">site terms</a>",
+			"submit"	: "Register"
+		},
+		"password"	: {
+			"page"		: "Change password",
+			"old"		: "Old Password <span>(required)<\/span>",
+			"olddesc"	: "Must match current password.",
+			"new"		: "New password <span>(required)<\/span>",
+			"newdesc"	: "Minimum {pass_min} characters. Must be different from old password.",
+			"submit"	: "Change"
+		},
+		"profile"	: {
+			"page"		: "Profile",
+			"name"		: "Name",
+			"display"	: "Display name <span>(optional)<\/span>",
+			"displaydesc"	: "Between {display_min} and {display_max} characters. Letters, numbers, and spaces supported.",
+			"bio"		: "Bio <span>(optional)<\/span>",
+			"biodesc"	: "Simple HTML and a subset of <a href=\"{formatting}\">Markdown<\/a> supported.",
+			"submit"	: "Save"
+		}, 
+		"anonpost"	: {
+			"page"		: "Create message",
+			"title"		: "Message title",
+			"titledesc"	: "Between {title_min} and {title_max} characters. Letters, numbers, and spaces supported.",
+			"name"		: "Name <span>(optional)<\/span>",
+			"namedesc"	: "Between {name_min} and {name_max} characters. Letters, numbers, and spaces supported. Name#secret format supported.",
+			"msg"		: "Message <span>(required)<\/span>",
+			"msgdesc"	: "Simple HTML and a subset of <a href=\"{formatting}\">Markdown<\/a> supported.",
+			"submit"	: "Post"
+		},
+		"userpost"	: {
+			"page"		: "Create message",
+			"title"		: "Message title",
+			"titledesc"	: "Between {title_min} and {title_max} characters. Letters, numbers, and spaces supported.",
+			"name"		: "Posting as <a href=\"{userlink}\">{username}<\/a>",
+			"msg"		: "Message <span>(required)<\/span>",
+			"msgdesc"	: "Simple HTML and a subset of <a href=\"{formatting}\">Markdown<\/a> supported.",
+			"submit"	: "Post"
+		},
+		"editpost"	: {
+			"page"		: "Edit message",
+			"title"		: "Message title",
+			"titledesc"	: "Between {title_min} and {title_max} characters. Letters, numbers, and spaces supported.",
+			"msg"		: "Editing Message <span>(required)<\/span>",
+			"msgdesc"	: "Simple HTML and a subset of <a href=\"{formatting}\">Markdown<\/a> supported.",
+			"submit"	: "Save changes"
+		}
+	},
+	"nav"		: {
+		"previous"	: "Previous",
+		"next"		: "Next",
+		"home"		: "Home",
+		"about"		: "About",
+		"search"	: "Search",
+		"feed"		: "Feed",
+		"help"		: "Help"
+	}, 
+	"errors"	: {
+		"error"		: "Error",
+		"generic"	: "An error has occured",
+		"returnhome"	: "<a href=\"{home}\">Return home<\/a>",
+		"noposts"	: "No more posts. Return <a href=\"{home}\">home<\/a>.",
+		"notfound"	: "Page not found",
+		"noroute"	: "No route defined",
+		"badmethod"	: "Method not allowed",
+		"nomethod"	: "Method not implemented",
+		"denied"	: "Access denied",
+		"invalid"	: "Invalid request",
+		"codedetect"	: "Server-side code detected",
+		"expired"	: "This form has expired",
+		"toomany"	: "Too many requests",
+		"loginwait"	: "Login unsuccessful, please wait a few minutes before trying again",
+		"registerwait"	: "Please wait a few minutes before trying to register again"
+	}
+}
