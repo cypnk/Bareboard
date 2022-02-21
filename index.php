@@ -163,6 +163,9 @@ define( 'ALLOW_UPLOAD',		0 );
 // Allow unregistered users to post anonymously
 define( 'ALLOW_ANON_POST',	1 );
 
+// Allow unregistered users to edit their own posts
+define( 'ALLOW_ANON_EDIT',	1 );
+
 // Minimum password length for users
 define( 'PASS_MIN',	7 );
 
@@ -206,6 +209,22 @@ define( 'DEFAULT_BASEPATH',	<<<JSON
 	"basepath"		: "\/",
 	"is_maintenance"	: 0,
 	"settings"		: []
+}
+JSON
+);
+
+// Default individual forum settings
+define( 'FORUM_SETTINGS',	<<<JSON
+{
+	"post_level"		: 0,
+	"edit_level"		: 0,
+	"mod_level"		: 70,
+	"anon_view"		: 1,
+	"anon_post"		: 1,
+	"anon_edit"		: 1,
+	"locked_user_view"	: 1,
+	"unapproved_user_view"	: 1,
+	"allow_upload"		: 1
 }
 JSON
 );
@@ -4296,6 +4315,43 @@ function getInParam(
 }
 
 /**
+ *  Helper to detect and parse a 'settings' data type
+ *  
+ *  @param array	$results	Database result row
+ */
+function formatSettings( array $results ) {
+	if ( empty( $results ) ) {
+		return [];
+	}
+	foreach ( $results as $k => $v ) {
+		
+		if ( !\is_string( $k ) || \is_numeric( $k ) ) {
+			continue;
+		}
+		
+		// Settings type?
+		if ( !\str_ends_with( \strtolower( $k ), 'settings' ) ) {
+			continue;
+		}
+		// Can be decoded?
+		if ( !\is_string( $v ) ) {
+			continue;
+		}
+		
+		$t = \trim( $v );
+		// Check for brackets
+		if ( 
+			\str_starts_with( $t, '{' ) && 
+			\str_ends_with( $t, '}' )
+		) {
+			$results[$k] = decode( $t );
+		}
+	}
+	
+	return $results;
+} 
+
+/**
  *  Get parameter result from database
  *  
  *  @param string	$sql	Database SQL query
@@ -4309,8 +4365,12 @@ function getResults(
 	string		$dsn		= \DATA
 ) : array {
 	$res = dataExec( $sql, $params, 'results', $dsn );
-	return 
-	empty( $res ) ? [] : ( \is_array( $res ) ? $res : [] );
+	if ( empty( $res ) ) {
+		return [];
+	}
+	
+	return \is_array( $res ) ? 
+		\array_map( 'formatSettings', $res ) : [];
 }
 
 /**
@@ -4360,9 +4420,10 @@ function getSingle(
 ) : array {
 	$data	= getResults( $sql, [ ':id' => $id ], $dsn );
 	if ( empty( $data ) ) {
-		return $data[0];
+		return [];
 	}
-	return [];
+	return \is_array( $data[0] ) ? 
+		formatSettings( $data[0] ) : $data[0];
 }
 
 /**
@@ -10056,7 +10117,9 @@ function findCookie(
  */
 function findUserById( int $id ) : array {
 	static $sql	= 
-	"SELECT * FROM users WHERE id = :id LIMIT 1;";
+	"SELECT id, username, display, bio, email, 
+		created, updated, settings, status FROM users 
+		WHERE id = :id LIMIT 1;";
 	
 	$results	= 
 	getResults( $sql, [ ':id' => $id ], \FORUM_DATA );
@@ -10095,6 +10158,7 @@ function findUserByUsername( string $username ) : array {
 function formatAuthUser( array $user ) : array {
 	$user['is_approved']	??= false;
 	$user['is_locked']	??= false;
+	$user['user_settings']	??= [];
 	
 	return [
 		'id'		=> ( int ) ( $user['id'] ?? 0 ), 
@@ -10103,7 +10167,10 @@ function formatAuthUser( array $user ) : array {
 		'hash'		=> $user['hash'] ?? '',
 		'is_approved'	=> $user['is_approved'] ? true : false,
 		'is_locked'	=> $user['is_locked'] ? true : false, 
-		'auth'		=> $user['auth'] ?? ''
+		'auth'		=> $user['auth'] ?? '',
+		'settings'	=> 
+			\is_array( $user['user_settings'] ) ? 
+				$user['user_settings'] : []
 	];
 }
 
@@ -10160,7 +10227,7 @@ function authUser( bool $delete = false ) : array {
 	} else {
 		// Fetched results must be a 6-item array
 		$user		= $_SESSION['user'];
-		if ( \count( $user ) !== 6 ) { 
+		if ( \count( $user ) !== 8 ) { 
 			$_SESSION['user']	= '';
 			unset( $user );
 			return []; 
@@ -10201,7 +10268,8 @@ function setAuth( array $user, bool $cookie ) {
 		'name'		=> $user['name'],
 		'is_approved'	=> $user['is_approved'],
 		'is_locked'	=> $user['is_locked'],
-		'auth'		=> $auth
+		'auth'		=> $auth,
+		'settings'	=> $user['settings']
 	];
 	
 	if ( $cookie ) {
@@ -10286,7 +10354,7 @@ function processLogin( array $data, string $path, int &$status ) {
 			$rem	=  ( bool ) ( $data['rem'] ?? 0 );
 			
 			// Set login session
-			setAuth( $user, $rem );
+			setAuth( formatAuthUser( $user ), $rem );
 			
 			// Redirect to path
 			sendPage( $path, 202 );
@@ -10605,14 +10673,22 @@ function processRegister( array $data, string $path ) {
 		);
 	}
 	
-	// Get complete info
-	$existing	= findUserByUsername( $data['username'] );
-	
 	// "Remember me"
 	$rem		=  ( bool ) ( $data['rem'] ?? 0 );
 	
+	// Get complete info
+	$existing	= findUserById( $id );
+	
+	// Check if retreival went wrong
+	if ( empty( $existing ) ) {
+		sendError( 
+			500, 
+			errorLang( 'generic', \MSG_GENERIC ) 
+		);
+	}
+	
 	// Set authentication
-	setAuth( $existing, $rem );
+	setAuth( formatAuthUser( $existing ), $rem );
 	
 	// Redirect to login
 	sendPage( $path, 202 ); 
@@ -10823,6 +10899,53 @@ function changePassForm( int $id, int &$status ) : array {
 /**
  *  Forum functionality
  */
+
+/**
+ *  Add or edit forum
+ *  
+ *  @param int		$id		Current forum id or empty if new
+ *  @param int		$parent		Parent forum or move-to forum
+ *  @param int		$status		HTML Form validation status
+ *  @return array
+ */
+function forumForm( int $id, int $parent, int &$status ) : array {
+	$status	= validateForm( 'forum' );
+	
+	if ( $status != \FORM_STATUS_VALID ) { 
+		return [];
+	}
+	
+	$filter = [
+		'id'		=> [
+			'filter'	=> \FILTER_VALIDATE_INT,
+			'options'	=> [
+				'default'	=> 0,
+				'min_range'	=> 1
+			]
+		],
+		[
+		'parent_id'		=> [
+			'filter'	=> \FILTER_VALIDATE_INT,
+			'options'	=> [
+				'default'	=> 0,
+				'min_range'	=> 1
+			]
+		],
+		
+		'title'	=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'title'
+		],
+		
+		'description'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'bland'
+		]
+	];
+	
+	return \filter_input_array( \INPUT_POST, $filter );
+}
+
 
 /**
  *  Get forum breadcrumbs from current leaf to root
