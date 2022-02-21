@@ -21,6 +21,9 @@ CREATE TABLE users (
 	email TEXT DEFAULT NULL COLLATE NOCASE,
 	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	
+	-- Serialized JSON
+	settings TEXT NOT NULL DEFAULT '{}' COLLATE NOCASE,
 	status INTEGER NOT NULL DEFAULT 0
 );-- --
 CREATE UNIQUE INDEX idx_user_name ON users( username );-- --
@@ -65,6 +68,7 @@ SELECT
 	users.status AS status, 
 	users.username AS name,
 	users.password AS password,
+	users.settings AS user_settings,
 	ua.is_approved AS is_approved, 
 	ua.is_locked AS is_locked
 	
@@ -255,6 +259,7 @@ CREATE TABLE forums(
 	
 	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	sort_order INTEGER NOT NULL DEFAULT 0,
+	settings TEXT NOT NULL DEFAULT '{}' COLLATE NOCASE,
 	status INTEGER NOT NULL DEFAULT 0,
 	
 	CONSTRAINT fk_forum_parent 
@@ -533,6 +538,7 @@ CREATE VIEW forum_view AS SELECT
 	cats.reply_count AS reply_count,
 	cats.sort_order AS sort_order,
 	cats.status AS status,
+	cats.settings AS forum_settings,
 	
 	GROUP_CONCAT( subs.id, ',' ) AS sub_ids,
 	GROUP_CONCAT( subs.status, ',' ) AS sub_status,
@@ -553,6 +559,7 @@ CREATE VIEW forum_view AS SELECT
 	tuser.username AS last_topic_username,
 	tuser.display AS last_topic_user_display,
 	tuser.email AS last_topic_user_email,
+	tuser.settings AS last_topic_user_settings,
 	tuser.status AS last_topic_user_status,
 	
 	replies.id AS last_reply_id,
@@ -569,6 +576,7 @@ CREATE VIEW forum_view AS SELECT
 	ruser.username AS last_reply_username,
 	ruser.display AS last_reply_user_display,
 	ruser.email AS last_reply_user_email,
+	ruser.settings AS last_reply_user_settings,
 	ruser.status AS last_reply_user_status
 	
 	FROM forums cats 
@@ -584,7 +592,7 @@ CREATE VIEW forum_view AS SELECT
 
 CREATE VIEW forum_summary_view AS SELECT
 	id, title, description, sort_order, topic_count, 
-	reply_count, status
+	reply_count, settings, status
 	
 	FROM forums;-- --
 
@@ -604,6 +612,7 @@ CREATE VIEW thread_view AS SELECT
 	users.username AS username,
 	users.display AS user_display, 
 	users.created AS user_created,
+	users.settings AS user_settings,
 	users.status AS user_status,
 	
 	posts.author_email AS author_email,
