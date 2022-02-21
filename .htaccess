@@ -1,0 +1,15 @@
+Options +FollowSymLinks
+RewriteEngine on
+
+# All requests to /cache folder
+RewriteCond %{REQUEST_URI} ^/cache [NC]
+
+# All requests to readme files
+RewriteCond %{REQUEST_URI} ^/readme [NC]
+
+# All files and folders that don't exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Send to /index.php (including any query strings added at the end)
+RewriteRule ^.*$ /index.php [L,QSA]
