@@ -75,6 +75,16 @@
 			"msg"		: "Editing Message <span>(required)<\/span>",
 			"msgdesc"	: "Simple HTML and a subset of <a href=\"{formatting}\">Markdown<\/a> supported.",
 			"submit"	: "Save changes"
+		},
+		"anoneditpost"	: {
+			"page"		: "Edit message",
+			"title"		: "Message title",
+			"titledesc"	: "Between {title_min} and {title_max} characters. Letters, numbers, and spaces supported.",
+			"msg"		: "Editing Message <span>(required)<\/span>",
+			"msgdesc"	: "Simple HTML and a subset of <a href=\"{formatting}\">Markdown<\/a> supported.",
+			"name"		: "Name <span>(Name#secret format required to edit)<\/span>",
+			"namedesc"	: "Between {name_min} and {name_max} characters. Letters, numbers, and spaces supported.",
+			"submit"	: "Save changes"
 		}
 	},
 	"nav"		: {
