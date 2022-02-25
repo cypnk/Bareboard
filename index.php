@@ -12309,17 +12309,6 @@ function showNewTopicRoute( string $event, array $hook, array $params ) {
 	}
 	
 	$user	= forumUser();
-	if ( empty( $user ) ) {
-		// Posting isn't allowed for unregistered users?
-		if ( !config( 
-			'allow_anon_post', 
-			\ALLOW_ANON_POST, 
-			'bool' 
-		) ) {
-			sendDenied();
-		}
-	}
-	
 	send( 200, newPostPage( $user, $id ) );
 }
 
@@ -12349,16 +12338,8 @@ function doTopicRoute( string $event, array $hook, array $params ) {
 	}
 	
 	$user	= forumUser();
-	if ( empty( $user ) ) {
-		if ( !config( 
-			'allow_anon_post', 
-			\ALLOW_ANON_POST, 
-			'bool' 
-		) ) {
-			sendDenied();
-		}
-	}
-	$tid = newTopic( 
+	$tid	= 
+	newTopic( 
 		( int ) $id, 
 		$data['title'], 
 		$data['message'], 
@@ -12385,17 +12366,6 @@ function showNewReplyRoute( string $event, array $hook, array $params ) {
 	}
 	
 	$user	= forumUser();
-	if ( empty( $user ) ) {
-		// Editing isn't allowed for unregistered users?
-		if ( !config( 
-			'allow_anon_post', 
-			\ALLOW_ANON_POST, 
-			'bool' 
-		) ) {
-			sendDenied();
-		}
-	}
-	
 	send( 200, newPostPage( $user, null, $id ) );
 }
 
