@@ -10942,6 +10942,43 @@ function changePassForm( int $id, int &$status ) : array {
  */
 
 
+/**
+ *  New topic form
+ *  
+ *  @param int		$forum_id	Forum unique identifier
+ *  @param int		$status		HTML Form validation status
+ *  @return array
+ */
+function topicForm( int $forum_id, int &$status ) : array {
+	$status	= 
+	validateForm( 'topic', false, true, [ 'forum=' . $forum_id ] );
+	
+	if ( $status != \FORM_STATUS_VALID ) { 
+		return [];
+	}
+	
+	$filter = [
+		'forum'	=> [
+			'filter'	=> \FILTER_VALIDATE_INT,
+			'options'	=> [
+				'default'	=> 0,
+				'min_range'	=> 1
+			]
+		],
+		// Post body
+		'message'	=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'title'
+		],
+		
+		'author'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'tripcode'
+		]
+	];
+	
+	return \filter_input_array( \INPUT_POST, $filter );
+}
 
 /**
  *  Add or edit forum
