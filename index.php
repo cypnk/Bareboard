@@ -5562,9 +5562,12 @@ function cleanUrl(
  *  @param string	$email	Raw email (currently doesn't support Unicode domains)
  *  @return string
  */
-function cleanEmail( string $email ) : string {
+function cleanEmail( ?string $email = null ) : string {
 	return 
-	\filter_var( $email, \FILTER_VALIDATE_EMAIL ) ? $email : '';
+	empty( $email ) ? '' : (
+		\filter_var( $email, \FILTER_VALIDATE_EMAIL ) ? 
+		$email : ''
+	);
 }
 
 /**
@@ -10975,10 +10978,13 @@ function topicForm( int $forum_id, int &$status ) : array {
 			'filter'	=> \FILTER_CALLBACK,
 			'options'	=> 'title'
 		],
-		
 		'author'		=> [
 			'filter'	=> \FILTER_CALLBACK,
 			'options'	=> 'tripcode'
+		],
+		'email'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'cleanEmail'
 		]
 	];
 	
@@ -11288,7 +11294,7 @@ function newTopic(
 	?string	$email		= null,
 	?int	$pinned		= null, 
 	?int	$sort		= null, 
-	?int	$status		= null 
+	?int	$status		= null
 ) : int {
 	static $sql	= 
 	"INSERT INTO posts( forum_id, title, user_id, body, bare, 
@@ -12303,9 +12309,8 @@ function showNewTopicRoute( string $event, array $hook, array $params ) {
 	}
 	
 	$user	= forumUser();
-
 	if ( empty( $user ) ) {
-		// Editing isn't allowed for unregistered users?
+		// Posting isn't allowed for unregistered users?
 		if ( !config( 
 			'allow_anon_post', 
 			\ALLOW_ANON_POST, 
@@ -12318,17 +12323,57 @@ function showNewTopicRoute( string $event, array $hook, array $params ) {
 	send( 200, newPostPage( $user, $id ) );
 }
 
-// TODO: New forum topic
+// New forum topic
 function doTopicRoute( string $event, array $hook, array $params ) {
-	$user	= forumUser();
+	$forum = $_POST['forum'] ?? '';
+	if ( empty( $forum ) || !\is_numeric( $forum ) ) {
+		sendNotFound();
+	}
 	
-	// Forum id
-	$id	= ( int ) ( $params['id'] ?? 0 );
+	// Expired?
+	$status = \FORM_STATUS_VALID;
+	$data	= topicForm( ( int ) $_POST['forum'], $status );
+	if ( $status != \FORM_STATUS_VALID ) {
+		sendExpired();
+	}
+	
+	// No new post in filtered data?
+	if ( empty( $data ) ) {
+		sendNotFound();
+	}
+	
+	// Filtered forum id
+	$id	= $data['forum'];
 	if ( empty( $id ) ) {
 		sendNotFound();
 	}
 	
-	send( 200, 'New topic created in forum ' . $id );
+	$user	= forumUser();
+	if ( empty( $user ) ) {
+		if ( !config( 
+			'allow_anon_post', 
+			\ALLOW_ANON_POST, 
+			'bool' 
+		) ) {
+			sendDenied();
+		}
+	}
+	$tid = newTopic( 
+		( int ) $id, 
+		$data['title'], 
+		$data['message'], 
+		$data['name'], 
+		$data['email']
+	);
+	// Error creating new topic?
+	if ( empty( $tid ) ) {
+		sendError( 500, 'Error creating new topic' );
+	}
+	
+	$path = pageRoutePath( 'showtopic', 'topic' );
+	
+	// Redirect to new topic page
+	redirect( 201, slashPath( $path, true ) . $tid );
 }
 
 // New topic reply page
@@ -12480,9 +12525,7 @@ function doEditProfileRoute( string $event, array $hook, array $params ) {
 		sendExpired();
 	}
 	
-	$path = 
-	strstr( eventRoutePrefix( 'showuser', 'showuser' ), ':', true );
-	
+	$path = pageRoutePath( 'showuser', 'user' );
 	redirect( 202, slashPath( $path, true ) . $user['name'] );
 }
 
