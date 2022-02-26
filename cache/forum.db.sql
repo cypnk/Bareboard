@@ -177,7 +177,8 @@ SELECT user_id,
 	last_pass_change,
 	failed_attempts,
 	failed_last_start,
-	failed_last_attempt
+	failed_last_attempt,
+	strftime( '%s', created ) AS activity_since
 	
 	FROM user_auth;-- --
 
@@ -592,7 +593,7 @@ CREATE VIEW forum_view AS SELECT
 
 CREATE VIEW forum_summary_view AS SELECT
 	id, title, description, sort_order, topic_count, 
-	reply_count, settings, status
+	reply_count, settings, strftime( '%s', created ) AS since, status
 	
 	FROM forums;-- --
 
@@ -608,6 +609,7 @@ CREATE VIEW thread_view AS SELECT
 	posts.is_pinned AS is_pinned,
 	posts.status AS status,
 	posts.sort_order AS sort_order,
+	strftime( '%s', posts.created ) AS post_since,
 	
 	users.username AS username,
 	users.display AS user_display, 
@@ -677,6 +679,8 @@ CREATE VIEW thread_polls_view AS SELECT
 	po.sort_order AS sort_order,
 	polls.id AS poll_id,
 	polls.post_id AS post_id,
+	polls.created AS poll_created,
+	strftime( '%s', polls.created ) AS poll_since,
 	
 	users.username AS username,
 	users.display AS user_display,
@@ -728,6 +732,7 @@ CREATE VIEW chat_view AS SELECT
 	chat.author_name AS author_name,
 	chat.author_key AS author_key,
 	chat.author_email AS author_email,
+	strftime( '%s', chat.created ) AS chat_since,
 	
 	users.username AS username,
 	users.display AS user_display,
@@ -790,6 +795,7 @@ CREATE VIEW moderation_user_view AS SELECT
 	md.response AS response, 
 	md.reason AS reason, 
 	md.created AS created, 
+	strftime( '%s', md.created ) AS mod_since,
 	md.expires AS expires, 
 	uu.username AS username,
 	uc.user_clean AS user_clean
