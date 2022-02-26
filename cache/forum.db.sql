@@ -689,6 +689,60 @@ CREATE VIEW thread_polls_view AS SELECT
 	LEFT JOIN users ON pv.user_id = users.id;-- --
 
 
+-- Quick messages
+CREATE TABLE chat(
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	user_id INTEGER DEFAULT NULL,
+	body TEXT NOT NULL COLLATE NOCASE,
+	author_name TEXT DEFAULT NULL COLLATE NOCASE,
+	author_key TEXT DEFAULT NULL COLLATE NOCASE,
+	author_email TEXT DEFAULT NULL COLLATE NOCASE,
+	author_ip TEXT DEFAULT NULL COLLATE NOCASE,
+	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	status INTEGER NOT NULL DEFAULT 0,
+	
+	CONSTRAINT fk_chat_user 
+		FOREIGN KEY ( user_id ) 
+		REFERENCES users ( id )
+		ON DELETE SET NULL
+);-- --
+CREATE INDEX idx_chat_user ON chat ( user_id ) 
+	WHERE user_id IS NOT NULL;-- --
+CREATE INDEX idx_chat_author_name ON chat ( author_name ) 
+	WHERE author_name IS NOT NULL;-- --
+CREATE INDEX idx_chat_author_key ON chat ( author_key ) 
+	WHERE author_key IS NOT NULL;-- --
+CREATE INDEX idx_chat_author_email ON chat ( author_email ) 
+	WHERE author_email IS NOT NULL;-- --
+CREATE INDEX idx_chat_author_ip ON chat ( author_ip ) 
+	WHERE author_ip IS NOT NULL;-- --
+CREATE INDEX idx_chat_status ON chat ( status );-- --
+
+CREATE VIEW chat_view AS SELECT
+	chat.id AS id,
+	chat.user_id AS user_id,
+	chat.body AS body,
+	chat.created AS chat_created,
+	chat.status AS chat_status,
+	chat.author_ip AS author_ip,
+	chat.author_name AS author_name,
+	chat.author_key AS author_key,
+	chat.author_email AS author_email,
+	
+	users.username AS username,
+	users.display AS user_display,
+	users.created AS user_created,
+	users.status AS user_status,
+	
+	ua.is_approved AS is_approved,
+	ua.is_locked AS is_locked,
+	ua.last_ip AS last_ip,
+	ua.last_ua AS last_ua
+	
+	FROM chat
+	LEFT JOIN users ON chat.user_id = users.id
+	LEFT JOIN user_auth ua ON users.id = ua.user_id;-- --
+
 
 -- Moderation and content filtering
 -- Usage:
