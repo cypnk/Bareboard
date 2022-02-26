@@ -12776,6 +12776,14 @@ function addForumRoutes( string $event, array $hook, array $params ) {
 	[ 'post', 'post/edit',			'doeditreply' ],
 	
 	/**
+	 *  Chat routes
+	 */
+	[ 'get', 'chat',			'showchat' ],
+	[ 'get', 'chat/since/:id',		'showchatsince' ],
+	[ 'get', 'chat/user/:id',		'showchatuser' ],
+	[ 'post', 'chat',			'dochat' ],
+	
+	/**
 	 *  Poll routes
 	 */
 	[ 'post', 'poll',			'dovote' ],
