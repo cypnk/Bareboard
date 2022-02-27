@@ -95,6 +95,9 @@ define( 'PLUGIN_DATA',	CACHE . 'plugins/' );
 // Writable directory to hold user-uploaded files
 define( 'UPLOADS',	CACHE . 'uploads/' );
 
+// Display theme and template directory for overriding appearances
+define( 'THEMES',	CACHE . 'themes/' );
+
 /**
  *  These file names should be left as-is unless there's a good reason 
  *  to change them
@@ -259,6 +262,9 @@ define( 'DATE_NICE',	'l, F j, Y' );
 define( 'TIMEZONE',		'America/New_York' );
 // For a list of valid values for this, see:
 // https://www.php.net/manual/en/timezones.php
+
+// Currently used display theme
+define( 'THEME',		'default' );
 
 
 // Allowed extensions
@@ -449,7 +455,6 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"post_index_header_h_classes"	: "",
 	"post_index_item_classes"	: "",
 	
-	"post_classes"			: "",
 	"post_wrap_classes"		: "",
 	"post_heading_classes"		: "",
 	"post_heading_h_classes"	: "",
@@ -458,10 +463,8 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"post_heading_author_a_classes"	: "",
 	"post_heading_wrap_classes"	: "content",
 	"post_body_wrap_classes"	: "content",
-	"post_body_content_classes"	: "",
 	"post_pub_classes"		: "",
 	
-	"post_idx_classes"		: "",
 	"post_idx_wrap_classes"		: "",
 	"post_idx_heading_classes"	: "",
 	"post_idx_heading_h_classes"	: "",
@@ -470,7 +473,6 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"post_idx_heading_author_a_classes": "",
 	"post_idx_heading_wrap_classes"	: "content",
 	"post_idx_body_wrap_classes"	: "content",
-	"post_idx_body_content_classes"	: "",
 	"post_idx_pub_classes"		: "",
 	
 	"footer_classes"		: "",
@@ -1050,38 +1052,38 @@ HTML;
 
 // Registered user comment
 $templates['tpl_user_comment']	= <<<HTML
-<article class="{post_classes}">
+<article class="{post_wrap_classes}">
 	<header class="{post_heading_classes}">
 		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
 		<address class="{post_heading_author_classes}"><a 
 			class="{post_heading_author_a_classes}" 
 			href="{author_link}">{author}</a></address>
 	</header>
-	<section class="{post_body_content_classes}>{body}</section>
+	<section class="{post_body_wrap_classes}>{body}</section>
 </article>
 HTML;
 
 // Anonymous visitor comment
 $templates['tpl_anon_comment']	= <<<HTML
-<article class="{post_classes}">
+<article class="{post_wrap_classes}">
 	<header class="{post_heading_classes}">
 		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
 		<address class="{post_heading_author_classes}">{author}</address>
 	</header>
-	<section class="{post_body_content_classes}>{body}</section>
+	<section class="{post_body_wrap_classes}>{body}</section>
 </article>
 HTML;
 
 // Moderator view of user comment
 $templates['tpl_moduser_comment']	= <<<HTML
-<article class="{post_classes}">
+<article class="{post_wrap_classes}">
 	<header class="{post_heading_classes}">
 		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
 		<address class="{post_heading_author_classes}"><a 
 			class="{post_heading_author_a_classes}" 
 			href="{author_link}">{author}</a></address>
 	</header>
-	<section class="{post_body_content_classes}>{body}</section>
+	<section class="{post_body_wrap_classes}>{body}</section>
 	<footer>
 		<label class="func">
 			<input type="checkbox" name="select[]" value="{id}"> 
@@ -1095,12 +1097,12 @@ HTML;
 
 // Moderator view of anonymous comment
 $templates['tpl_modanon_comment']	= <<<HTML
-<article class="{post_classes}">
+<article class="{post_wrap_classes}">
 	<header class="{post_heading_classes}">
 		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
 		<address class="{post_heading_author_classes}">{author}</address>
 	</header>
-	<section class="{post_body_content_classes}>{body}</section>
+	<section class="{post_body_wrap_classes}>{body}</section>
 	<footer>
 		<label class="func">
 			<input type="checkbox" name="select[]" value="{id}"> 
@@ -10948,6 +10950,96 @@ function changePassForm( int $id, int &$status ) : array {
 }
 
 
+/**
+ *  Themes and templates
+ */
+
+/**
+ *  Template file loading helper
+ *  
+ *  @param string	$fdir	Theme folder
+ *  @param string	$t	Template name
+ *  @param array	$err	Loading error holder
+ *  @return string
+ */
+function templateFile( string $fdir, string $t, array &$err ) : string {
+	
+	// Template file from theme folder
+	$fname	= $fdir . $t . '.tpl';
+	
+	if ( empty( filterDir( $fname, \THEMES ) ) ) {
+		// Invalid template location
+		$err[] = $t;
+		return '';
+	}
+	
+	// Only load existing templates
+	if ( !\is_readable( $fname ) ) {
+		$err[] = $t;
+		return '';
+	}
+	
+	$data = \file_get_contents( $fname );
+	
+	// Nothing loaded?
+	if ( false === $data ) {
+		$err[] = $t;
+		return '';
+	}
+	return $data;
+}
+
+/**
+ *  Load configuration defined theme and override default templates
+ */
+function loadTemplates( string $event, array $hook, array $params ) {
+	// TODO: Override from theme settings
+	// Current list of templates
+	$tpl = config( 'templates', [] );
+	if ( empty( $tpl ) || !\is_array( $tpl ) ) {
+		return \array_merge( $hook, $params );
+	}
+	
+	// Current theme name and theme directory
+	// Convention: THEMES/THEME/file.tpl
+	$theme	= config( 'theme', \THEME );
+	$fdir	= 
+	slashPath( slashPath( \THEMES, true ) . $theme, true );
+	
+	// TODO: Override class placeholders in 'default_classes'
+	
+	$loaded	= [];
+	$err	= [];
+	
+	// Override templates based on theme
+	foreach( $tpl as $t ) {
+		if ( !\is_string( $t ) ) {
+			continue;
+		}
+		
+		$data		= templateFile( $fdir, $t, $err );
+		if ( empty( $data ) ) {
+			continue;
+		}
+		$loaded[$t]	= pacify( $data );
+	}
+	
+	// Re-register new theme templates, if any
+	if ( !empty( $loaded ) ) {
+		template( '', $loaded );
+	}
+	
+	// Log any template loading errors on shutdown
+	if ( !empty( $err ) ) {
+		shutdown( 
+			'logError', 
+			'Error loading ' . $theme . ' theme file(s): ' . 
+				implode( ' ' . $err ) 
+		);
+	}
+	return \array_merge( $hook, $params );
+}
+
 
 
 /**
@@ -11889,7 +11981,10 @@ function checkConfig( string $event, array $hook, array $params ) {
 				\FILTER_FLAG_STRIP_BACKTICK | 
 				\FILTER_REQUIRE_ARRAY
 		],
-		
+		'theme'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'labelName'
+		],
 		'sites_enabled'=> [
 			'filter'	=> \FILTER_CALLBACK,
 			'flags'		=> \FILTER_REQUIRE_ARRAY,
@@ -12914,6 +13009,8 @@ hook( [ 'showsearch',	'searchRoute' ] );
 hook( [ 'search',	'doSearchRoute' ] );
 hook( [ 'searchpaginate','doSearchRoute' ] );
 
+// Load new templates after plugin load
+hook( [ 'pluginsloaded', 'loadTemplates' ] );
 
 /**
  *  Begin Bareboard
