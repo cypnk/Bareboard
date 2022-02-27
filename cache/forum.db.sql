@@ -379,6 +379,13 @@ BEGIN
 			WHERE posts.id = NEW.parent_id LIMIT 1 );
 END;-- --
 
+CREATE TRIGGER reply_update AFTER UPDATE ON posts FOR EACH ROW 
+WHEN NEW.parent_id IS NOT NULL AND NEW.forum_id IS NULL
+BEGIN
+	REPLACE INTO post_search( docid, body ) 
+		VALUES ( NEW.id, NEW.bare );
+END;-- --
+
 -- Topic deletion actions
 CREATE TRIGGER topic_delete BEFORE DELETE ON posts FOR EACH ROW
 WHEN OLD.forum_id IS NOT NULL AND OLD.parent_id IS NULL
