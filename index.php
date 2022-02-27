@@ -454,10 +454,11 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"post_heading_classes"		: "",
 	"post_heading_h_classes"	: "",
 	"post_heading_a_classes"	: "",
+	"post_heading_author_classes"	: "",
+	"post_heading_author_a_classes"	: "",
 	"post_heading_wrap_classes"	: "content",
 	"post_body_wrap_classes"	: "content",
 	"post_body_content_classes"	: "",
-	"post_body_tag_classes"		: "",
 	"post_pub_classes"		: "",
 	
 	"post_idx_classes"		: "",
@@ -465,10 +466,11 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"post_idx_heading_classes"	: "",
 	"post_idx_heading_h_classes"	: "",
 	"post_idx_heading_a_classes"	: "",
+	"post_idx_heading_author_classes": "",
+	"post_idx_heading_author_a_classes": "",
 	"post_idx_heading_wrap_classes"	: "content",
 	"post_idx_body_wrap_classes"	: "content",
 	"post_idx_body_content_classes"	: "",
-	"post_idx_body_tag_classes"	: "",
 	"post_idx_pub_classes"		: "",
 	
 	"footer_classes"		: "",
@@ -545,7 +547,7 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"search_form_classes"		: "",
 	"search_form_wrap_classes"	: "",
 	"search_fieldset_classes"	: "",
-	"field_wrap"			: "",
+	"field_wrap_classes"		: "",
 	"button_wrap"			: "",
 	"label_classes"			: "",
 	"check_label_classes"		: "",
@@ -806,12 +808,12 @@ $templates['tpl_login_page']	= <<<HTML
 <form action="{action}" method="post" class="{form_classes} {login_form_classes}" id="login_form">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{login_name_label_before}<label for="loginuser" class="{label_classes}">{lang:forms:login:name}</label>{login_name_label_after}
 		{login_name_input_before}<input id="loginuser" type="text" class="{input_classes}" aria-describedby="loginuser-desc" name="username" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})" required>{login_name_input_after}
 		{login_name_desc_before}<small id="loginuser-desc" class="{desc_classes}">{lang:forms:login:namedesc}</small>{login_name_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{login_pass_label_before}<label for="loginpass" class="{label_classes}">{lang:forms:login:pass}</label>{login_pass_label_after}
 		{login_pass_input_before}<input id="loginpass" type="password" class="{input_classes}" aria-describedby="loginpass-desc" name="password" maxlength="4096" pattern="([^\s][\w\s]{{pass_min},4096})" required>{login_pass_input_after}
 		{login_pass_desc_before}<small id="loginpass-desc" class="{desc_classes}">{lang:forms:login:passdesc}</small>{login_pass_desc_after}
@@ -838,17 +840,17 @@ $templates['tpl_register_page']	= <<<HTML
 <form action="{action}" method="post" class="{form_classes} {register_form_classes}" id="register_form">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{register_name_label_before}<label for="registername" class="{label_classes}">{lang:forms:register:name}</span></label>{register_name_label_after}
 		{register_name_input_before}<input id="registername" type="text" class="{input_classes}" aria-describedby="registername-desc" name="username" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})" required>{register_name_input_after}
 		{register_name_desc_before}<small id="registername-desc" class="{desc_classes}">{lang:forms:register:namedesc}</small>{register_name_desc_before}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{register_pass_label_before}<label for="registerpass" class="{label_classes}">{lang:forms:register:pass}</span></label>{register_pass_label_after}
 		{register_pass_input_before}<input id="registerpass" type="password" class="{input_classes}" aria-describedby="registerpass-desc" name="password" maxlength="4096" pattern="([^\s][\w\s]{{pass_min},4096})" required>{register_pass_input_after}
 		{register_pass_desc_before}<small id="registerpass-desc" class="{desc_classes}">{lang:forms:register:passdesc}</small>{register_pass_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{register_passr_label_before}<label for="passrepeat" class="{label_classes}">{lang:forms:register:repeat}</span></label>{register_passr_label_after}
 		{register_passr_input_before}<input id="passrepeat" type="text" class="{input_classes}" aria-describedby="passrepeat-desc" name="password2" maxlength="4096" pattern="([^\s][\w\s]{{pass_min},4096})" required>{register_passr_input_after}
 		{register_passr_desc_before}<small id="passrepeat-desc" class="{desc_classes}">{lang:forms:register:repeatdesc}</small>{register_passr_desc_after}
@@ -879,12 +881,12 @@ $templates['tpl_password_page']	= <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{oldpass_label_before}<label for="oldpass" class="{label_classes}">{lang:forms:password:old}</span></label>{oldpass_label_after} 
 		{oldpass_input_before}<input id="oldpass" type="password" class="{input_classes}" aria-describedby="oldpass-desc" name="password" maxlength="4096" pattern="([^\s][\w\s]{{pass_min},4096})" required>{oldpass_input_after}
 		{oldpass_desc_before}<small id="oldpass-desc" class="{desc_classes}">{lang:forms:password:olddesc}</small>{oldpass_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{newpass_label_before}<label for="newpass">{lang:forms:password:new}</span></label>{newpass_label_after} 
 		{newpass_input_before}<input id="newpass" type="text" class="{input_classes}" aria-describedby="newpass-desc" name="password2" maxlength="4096" pattern="([^\s][\w\s]{{pass_min},4096})" required>{newpass_input_after}
 		{newpass_desc_before}<small id="newpass-desc" class="{desc_classes}">{lang:forms:password:newdesc}</small>{newpass_desc_after}
@@ -912,16 +914,16 @@ $templates['tpl_profile_page']	= <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{profile_name_label_before}<label for="loginuser" class="{label_classes}">{lang:forms:profile:name}</label>{profile_name_label_after} 
 		{profile_name_input_before}<input id="loginuser" type="text" value="{username}" class="{input_classes}" disabled>{profile_name_input_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{display_label_before}<label for="display" class="{label_classes}">{lang:forms:profile:display}</span></label>{display_label_after} 
 		{display_input_before}<input id="display" type="text" class="{input_classes}" aria-describedby="display-desc" name="display" maxlength="{display_max}" pattern="([^\s][A-z0-9À-ž\s]+){{display_min},{display_max}}" value="{display}">{display_input_after}
 		{display_desc_before}<small id="display-desc" class="{desc_classes}">{lang:forms:profile:displaydesc}</small>{display_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{bio_label_before}<label for="bio" class="{label_classes}">{lang:forms:profile:bio}</span></label>{bio_label_after} 
 		{bio_input_before}<textarea id="bio" name="bio" rows="3" cols="60" class="{input_classes}" aria-describedby="bio-desc">{bio}</textarea>{bio_input_after} 
 		{bio_desc_before}<small id="bio-desc" class="{desc_classes}">{lang:forms:profile:biodesc}</small>{bio_desc_after}
@@ -1048,34 +1050,38 @@ HTML;
 
 // Registered user comment
 $templates['tpl_user_comment']	= <<<HTML
-<article class="post">
-	<header>
-		<time datetime="{date_utc}">{date_nice}</time>
-		<address><a href="{author_link}">{author}</a></address>
+<article class="{post_classes}">
+	<header class="{post_heading_classes}">
+		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
+		<address class="{post_heading_author_classes}"><a 
+			class="{post_heading_author_a_classes}" 
+			href="{author_link}">{author}</a></address>
 	</header>
-	<section>{body}</section>
+	<section class="{post_body_content_classes}>{body}</section>
 </article>
 HTML;
 
 // Anonymous visitor comment
 $templates['tpl_anon_comment']	= <<<HTML
-<article class="post">
-	<header>
-		<time datetime="{date_utc}">{date_nice}</time>
-		<address>{author}</address>
+<article class="{post_classes}">
+	<header class="{post_heading_classes}">
+		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
+		<address class="{post_heading_author_classes}">{author}</address>
 	</header>
-	<section>{body}</section>
+	<section class="{post_body_content_classes}>{body}</section>
 </article>
 HTML;
 
 // Moderator view of user comment
 $templates['tpl_moduser_comment']	= <<<HTML
-<article class="post">
-	<header>
-		<time datetime="{date_utc}">{date_nice}</time>
-		<address><a href="{author_link}">{author}</a></address>
+<article class="{post_classes}">
+	<header class="{post_heading_classes}">
+		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
+		<address class="{post_heading_author_classes}"><a 
+			class="{post_heading_author_a_classes}" 
+			href="{author_link}">{author}</a></address>
 	</header>
-	<section>{body}</section>
+	<section class="{post_body_content_classes}>{body}</section>
 	<footer>
 		<label class="func">
 			<input type="checkbox" name="select[]" value="{id}"> 
@@ -1089,12 +1095,12 @@ HTML;
 
 // Moderator view of anonymous comment
 $templates['tpl_modanon_comment']	= <<<HTML
-<article class="post">
-	<header>
-		<time datetime="{date_utc}">{date_nice}</time>
-		<address>{author}</address>
+<article class="{post_classes}">
+	<header class="{post_heading_classes}">
+		<time datetime="{date_utc}" class="{post_pub_classes}">{date_nice}</time>
+		<address class="{post_heading_author_classes}">{author}</address>
 	</header>
-	<section>{body}</section>
+	<section class="{post_body_content_classes}>{body}</section>
 	<footer>
 		<label class="func">
 			<input type="checkbox" name="select[]" value="{id}"> 
@@ -1117,17 +1123,17 @@ $templates['tpl_anonpost_form']	= <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{post_title_label_before}<label for="posttitle" class="{label_classes}">{lang:forms:anonpost:title}</label>{post_title_label_after}
 		{post_title_input_before}<input id="posttitle" type="text" class="{input_classes}" aria-describedby="posttitle-desc" name="title" maxlength="{title_max}" pattern="([^\s][\w\s]{{title_min},{title_max}})">{post_title_input_after}
 		{post_title_desc_before}<small id="posttitle-desc" class="{desc_classes}">{lang:forms:anonpost:titledesc}</small>{post_title_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{post_message_label_before}<label for="message" class="{label_classes}">{lang:forms:anonpost:msg}</label>{post_message_label_after}
 		{post_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{post_message_input_before}
 		{post_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:anonpost:msgdesc}</small>{post_message_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{post_name_label_before}<label for="authorname" class="{label_classes}">{lang:forms:anonpost:name}</label>{anonpost_name_label_after}
 		{post_name_input_before}<input id="authorname" type="text" class="{input_classes}" aria-describedby="authorname-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{post_name_input_before}
 		{post_name_desc_before}<small id="authorname-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{anonpost_name_desc_before}
@@ -1144,12 +1150,12 @@ $templates['tpl_userpost_form']	= <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{post_title_label_before}<label for="posttitle" class="{label_classes}">{lang:forms:userpost:title}</label>{post_title_label_after}
 		{post_title_input_before}<input id="posttitle" type="text" class="{input_classes}" aria-describedby="posttitle-desc" name="title" maxlength="{title_max}" pattern="([^\s][\w\s]{{title_min},{title_max}})">{post_title_input_after}
 		{post_title_desc_before}<small id="posttitle-desc" class="{desc_classes}">{lang:forms:userpost:titledesc}</small>{post_title_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{post_message_label_before}<label for="message" class="{label_classes}">{lang:forms:userpost:msg}</label>{post_message_label_after}
 		{post_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{post_message_input_before}
 		{post_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:userpost:msgdesc}</small>{post_message_desc_after}
@@ -1166,12 +1172,12 @@ $templates['tpl_editpost_form']	= <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{edit_title_label_before}<label for="posttitle">{lang:forms:editpost:title}</label>{edit_title_label_after}
 		{edit_title_input_before}<input id="posttitle" type="text" aria-describedby="posttitle-desc" name="title" maxlength="{title_max}" pattern="([^\s][\w\s]{{title_min},{title_max}})" value="{title}">{edit_title_input_after}
 		{edit_title_desc_before}<small id="posttitle-desc" class="{desc_classes}">{lang:forms:editpost:titledesc}</small>{edit_title_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{edit_message_label_before}<label for="message">{lang:forms:editpost:msg}</label>{edit_message_label_after}
 		{edit_message_input_before}<textarea id="message" name="message" rows="3" cols="60" aria-describedby="message-desc" required>{message}</textarea>{edit_message_input_after}
 		{edit_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:editpost:msgdesc}</small>{edit_message_desc_after}
@@ -1188,17 +1194,17 @@ $templates['tpl_anoneditpost_form']	= <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{edit_title_label_before}<label for="posttitle">{lang:forms:editpost:title}</label>{anonedit_title_label_after}
 		{edit_title_input_before}<input id="posttitle" type="text" aria-describedby="posttitle-desc" name="title" maxlength="{title_max}" pattern="([^\s][\w\s]{{title_min},{title_max}})" value="{title}">{edit_title_input_after}
 		{edit_title_desc_before}<small id="posttitle-desc" class="{desc_classes}">{lang:forms:editpost:titledesc}</small>{edit_title_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{edit_message_label_before}<label for="message">{lang:forms:anoneditpost:msg}</label>{anonedit_message_label_after}{edit_message_label_after}
 		{edit_message_input_before}<textarea id="message" name="message" rows="3" cols="60" aria-describedby="message-desc" required>{message}</textarea>{edit_message_input_after}
 		{edit_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:anoneditpost:msgdesc}</small>{edit_message_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{edit_name_label_before}<label for="authorname" class="{label_classes}">{lang:forms:anonedit:name}</label>{edit_name_label_after}
 		{edit_name_input_before}<input id="authorname" type="text" class="{input_classes}" aria-describedby="authorname-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{edit_name_input_before}
 		{edit_name_desc_before}<small id="authorname-desc" class="{desc_classes}">{lang:forms:anonedit:namedesc}</small>{edit_name_desc_before}
@@ -1214,17 +1220,17 @@ $templates['tpl_anonreply_form'] = <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{post_message_label_before}<label for="message" class="{label_classes}">{lang:forms:anonpost:msg}</label>{post_message_label_after}
 		{post_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{post_message_input_after}
 		{post_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:anonpost:msgdesc}</small>{post_message_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{post_name_label_before}<label for="postname" class="{label_classes}">{lang:forms:anonpost:name}</label>{post_name_label_after}
 		{post_name_input_before}<input id="postauthor" type="text" class="{input_classes}" aria-describedby="postauthor-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{post_name_input_after}
 		{post_name_desc_before}<small id="postauthor-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{post_name_desc_after}
 	</p>
-	<p><label class="ib right"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
+	<p class="{field_wrap_classes}"><label class="ib right"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
 		<input type="submit" value="{lang:forms:anonpost:submit}"></p>
 </form>
 HTML;
@@ -1236,8 +1242,8 @@ $templates['tpl_userreply_form'] = <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>{lang:forms:userpost:name}</p>
-	<p>
+	<p class="{field_wrap_classes}">{lang:forms:userpost:name}</p>
+	<p class="{field_wrap_classes}">
 		{post_message_label_before}<label for="message" class="{label_classes}">{lang:forms:userpost:msg}</label>{post_message_label_after}
 		{post_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{post_message_input_after}
 		{post_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:userpost:msgdesc}</small>{post_message_desc_after}
@@ -1253,7 +1259,7 @@ $templates['tpl_editpost_form'] = <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{editpost_message_label_before}<label for="message" class="{label_classes}">{lang:forms:editpost:msg}</label>{editpost_message_label_after}
 		{editpost_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{editpost_message_input_after}
 		{editpost_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:editpost:msgdesc}</small>{editpost_message_desc_after}
@@ -1269,12 +1275,12 @@ $templates['tpl_anoneditpost_form'] = <<<HTML
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
 	<input type="hidden" name="meta" value="{meta}">
-	<p>
+	<p class="{field_wrap_classes}">
 		{editpost_message_label_before}<label for="message" class="{label_classes}">{lang:forms:editpost:msg}</label>{editpost_message_label_after}
 		{editpost_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{editpost_message_input_after}
 		{editpost_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:editpost:msgdesc}</small>{editpost_message_desc_after}
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		{editpost_name_label_before}<label for="postname" class="{label_classes}">{lang:forms:anonpost:name}</label>{editpost_name_label_after}
 		{editpost_name_input_before}<input id="postauthor" type="text" class="{input_classes}" aria-describedby="postauthor-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{editpost_name_input_after}
 		{editpost_name_desc_before}<small id="postauthor-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{editpost_name_desc_after}
@@ -1345,7 +1351,7 @@ $templates['tpl_modtabs']	= <<<HTML
 HTML;
 
 $templates['tpl_modaction']	= <<<HTML
-<p><label for="{prefix}-action">{lang:tabs:mod:drop:action}</label>
+<p class="{field_wrap_classes}"><label for="{prefix}-action">{lang:tabs:mod:drop:action}</label>
 	<select id="{prefix}-action" name="action">
 		<option value="">--</option>
 		
@@ -1413,12 +1419,12 @@ $templates['tpl_defaultmodip_form']	= <<<HTML
 <form action="{action}" method="post" class="{form_classes}" id="modip_form">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
-	<p>
+	<p class="{field_wrap_classes}">
 		<label for="ip">{lang:tabs:mod:filters:iplbl}</label>
 		<input id="ip" type="text" aria-describedby="ip-desc" pattern="([^\s][\w\s,\.\:/]{3,255})" required>
 		<small id="ip-desc" class="{desc_classes}">{lang:tabs:mod:filters:ipdesc}</small>
 	</p>
-	<p>
+	<p class="{field_wrap_classes}">
 		<label for="host">{lang:tabs:mod:filters:hostlbl}</label>
 		<input id="host" type="text" aria-describedby="host-desc" pattern="([^\s][\w\s,\.\:/\-]{3,255})" required>
 		<small id="host-desc" class="{desc_classes}">{lang:tabs:mod:filters:hostdesc}</small>
@@ -1450,7 +1456,7 @@ $templates['tpl_modword_form']	= <<<HTML
 <form action="{action}" method="post" class="{form_classes}" id="modword_form">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
-	<p>
+	<p class="{field_wrap_classes}">
 		<label for="word">{lang:tabs:mod:filters:wordlbl}</label>
 		<input id="word" type="text" aria-describedby="word-desc" maxlength="255" pattern="([^\s][\w\s,]{3,255})" required>
 		<small id="word-desc" class="{desc_classes}">{lang:tabs:mod:filters:worddesc}</small>
@@ -1482,7 +1488,7 @@ $templates['tpl_moduserform']	= <<<HTML
 <form action="{action}" method="post" class="{form_classes}" id="moduser_form">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
-	<p>
+	<p class="{field_wrap_classes}">
 		<label for="user">{lang:tabs:mod:filters:userlbl}</label>
 		<input id="user" type="text" aria-describedby="user-desc" maxlength="255" pattern="([^\s][\w\s,]{3,255})" required>
 		<small id="user-desc" class="{desc_classes}">{lang:tabs:mod:filters:userdesc}</small>
@@ -1512,13 +1518,13 @@ $templates['tpl_modurl_form']	= <<<HTML
 <form action="{action}" method="post" class="{form_classes}" id="modurl_form">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
-	<p>
+	<p class="{field_wrap_classes}">
 		<label for="url">{lang:tabs:mod:filters:urllbl}</label>
 		<input id="url" type="text" aria-describedby="url-desc" maxlength="255" pattern="([^\s][\w\s]{3,255})" required>
 		<small id="url-desc" class="{desc_classes}">{lang:tabs:mod:filters:urldesc}</small>
 	</p>
 	
-	<p><label for="url-action">{lang:tabs:mod:drop:action}</label>
+	<p class="{field_wrap_classes}"><label for="url-action">{lang:tabs:mod:drop:action}</label>
 		<select id="url-action" name="action">
 			<option value="">--</option>
 			<option value="noanon">{lang:tabs:mod:drop:noanon}</option>
