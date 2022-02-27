@@ -1,0 +1,153 @@
+{
+"assets" : {
+	"css": [ "tachyons.min.css" ]
+},
+
+"classes" : {
+	"body_classes"			: "w-100 sans-serif bg-white",
+	
+	"heading_classes"		: "",
+	"heading_wrap_classes"		: "content", 
+	"heading_h_classes"		: "",
+	"heading_a_classes"		: "",
+	"tagline_classes"		: "",
+	"items_wrap_classes"		: "content", 
+	"no_posts_wrap"			: "content",
+	
+	"main_nav_classes"		: "main",
+	"main_ul_classes"		: "", 
+	
+	"pagination_wrap_classes"	: "content", 
+	"list_wrap_classes"		: "content", 
+	
+	"home_classes"			: "content",
+	"home_wrap_classes"			: "",
+	"about_classes"			: "content",
+	"about_wrap_classes"		: "",
+	
+	"post_index_wrap_classes"	: "content",
+	"post_index_ul_wrap_classes"	: "index",
+	"post_index_header_classes"	: "",
+	"post_index_header_h_classes"	: "",
+	"post_index_item_classes"	: "",
+	
+	"post_classes"			: "pa3 pa5-ns",
+	"post_wrap_classes"		: "",
+	"post_heading_classes"		: "bb b--black-70 pv4",
+	"post_heading_h_classes"	: "",
+	"post_heading_a_classes"	: "",
+	"post_heading_author_classes"	: "",
+	"post_heading_author_a_classes"	: "",
+	"post_heading_wrap_classes"	: "content",
+	"post_body_wrap_classes"	: "content",
+	"post_body_content_classes"	: "",
+	"post_pub_classes"		: "",
+	
+	"post_idx_classes"		: "",
+	"post_idx_wrap_classes"		: "",
+	"post_idx_heading_classes"	: "",
+	"post_idx_heading_h_classes"	: "",
+	"post_idx_heading_a_classes"	: "",
+	"post_idx_heading_author_classes": "",
+	"post_idx_heading_author_a_classes": "",
+	"post_idx_heading_wrap_classes"	: "content",
+	"post_idx_body_wrap_classes"	: "content",
+	"post_idx_body_content_classes"	: "",
+	"post_idx_pub_classes"		: "",
+	
+	"footer_classes"		: "",
+	"footer_wrap_classes"		: "content", 
+	"footer_nav_classes"		: "",
+	"footer_ul_classes"		: "",
+	
+	"crumb_classes"			: "",
+	"crumb_wrap_classes"		: "",
+	"crumb_sub_classes"		: "",
+	"crumb_sub_wrap_classes"	: "",
+	
+	"crumb_item_classes"		: "",
+	"crumb_link_classes"		: "",
+	"crumb_current_classes"		: "",
+	"crumb_current_item"		: "",
+	"pagination_classes"		: "",
+	"pagination_ul_classes"		: "",
+	
+	"nav_link_classes"		: "",
+	"nav_link_a_classes"		: "",
+	
+	"list_classes"			: "related",
+	"list_h_classes"		: "",
+	
+	"sibling_wrap_classes"		: "content",
+	"sibling_nav_classes"		: "siblings",
+	"sibling_nav_ul_classes"	: "",
+	
+	"related_wrap_classes"		: "content",
+	"related_h_classes"		: "",
+	"related_nav_classes"		: "related",
+	"related_ul_classes"		: "related",
+	
+	"nextprev_wrap_classes"		: "content", 
+	"nextprev_nav_classes"		: "siblings",
+	"nextprev_ul_classes"		: "",
+	"nextprev_next_classes"		: "",
+	"nextprev_next_a_classes"	: "",
+	"nextprev_prev_classes"		: "",
+	"nextprev_prev_a_classes"	: "",
+	
+	"nav_home_link_classes"		: "",
+	"nav_home_link_a_classes"	: "",
+	
+	"nav_current_classes"		: "",
+	"nav_current_s_classes"		: "",
+	"nav_prev_classes"		: "",
+	"nav_prev_a_classes"		: "",
+	"nav_noprev_classes"		: "",
+	"nav_noprev_s_classes"		: "",
+	"nav_next_classes"		: "",
+	"nav_next_a_classes"		: "",
+	"nav_nonext_classes"		: "",
+	"nav_nonext_s_classes"		: "",
+	
+	"nav_first1_classes"		: "",
+	"nav_first1_a_classes"		: "",
+	"nav_first2_classes"		: "",
+	"nav_first2_a_classes"		: "",
+	"nav_first_s_classes"		: "",
+	
+	"nav_last_s_classes"		: "",
+	"nav_last1_classes"		: "",
+	"nav_last1_a_classes"		: "",
+	"nav_last2_classes"		: "",
+	"nav_last2_a_classes"		: "",
+	
+	"code_wrap_classes"		: "",
+	"code_classes"			: "",
+	
+	"form_classes"			: "pa4 black-80",
+	"fieldset_classes"		: "",
+	"search_form_classes"		: "",
+	"search_form_wrap_classes"	: "",
+	"search_fieldset_classes"	: "",
+	"field_wrap_classes"		: "measure",
+	"button_wrap"			: "",
+	"label_classes"			: "f6 b db mb2",
+	"check_label_classes"		: "",
+	"special_classes"		: "normal black-80",
+	"input_classes"			: "input-reset db border-box hover-black w-100 measure ba b--black-20 pa2 br2 mb2",
+	"desc_classes"			: "f6 lh-copy black-80 db mb2",
+	"search_input_classes"		: "",
+	"search_button_classes"		: "",
+	
+	"login_form_classes"		: "",
+	"register_form_classes"		: "",
+	"password_form_classes"		: "",
+	"profile_form_classes"		: "",
+	
+	"submit_classes"		: "",
+	"alt_classes"			: "",
+	"warn_classes"			: "",
+	"action_classes"		: ""
+}
+
+}
