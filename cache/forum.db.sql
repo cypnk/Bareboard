@@ -243,10 +243,29 @@ BEGIN
 		strftime( '%s', 'failed_last_start' ) ) > 86400 );
 END;-- --
 
+-- Forum categories
+CREATE TABLE categories(
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	parent_id INTEGER DEFAULT NULL,
+	title TEXT NOT NULL COLLATE NOCASE,
+	sort_order INTEGER NOT NULL DEFAULT 0,
+	settings TEXT NOT NULL DEFAULT '{}' COLLATE NOCASE,
+	status INTEGER NOT NULL DEFAULT 0,
+	
+	CONSTRAINT fk_category_parent 
+		FOREIGN KEY ( parent_id ) 
+		REFERENCES categories ( id ) 
+		ON DELETE CASCADE
+);-- --
+CREATE UNIQUE INDEX idx_cat_title ON categories ( title );-- --
+CREATE INDEX idx_cat_parent ON categories ( parent_id );-- --
+CREATE INDEX idx_cat_sort ON categories ( sort_order );-- --
+CREATE INDEX idx_cat_status ON categories ( status );-- --
 
--- Main forums
+-- Discussion forums
 CREATE TABLE forums(
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	category_id INTEGER DEFAULT NULL,
 	parent_id INTEGER DEFAULT NULL,
 	
 	title TEXT NOT NULL COLLATE NOCASE,
@@ -263,11 +282,18 @@ CREATE TABLE forums(
 	settings TEXT NOT NULL DEFAULT '{}' COLLATE NOCASE,
 	status INTEGER NOT NULL DEFAULT 0,
 	
+	CONSTRAINT fk_forum_cat 
+		FOREIGN KEY ( category_id ) 
+		REFERENCES categories ( id ) 
+		ON DELETE CASCADE,
+	
 	CONSTRAINT fk_forum_parent 
 		FOREIGN KEY ( parent_id ) 
 		REFERENCES forums ( id ) 
 		ON DELETE CASCADE
 );-- --
+CREATE INDEX idx_forum_category ON forums ( category_id )
+	WHERE category_id IS NOT NULL;-- --
 CREATE INDEX idx_forum_created ON forums ( created );-- --
 CREATE INDEX idx_forum_last_topic_id ON forums ( last_topic_id )
 	WHERE last_topic_id IS NOT NULL;-- --
@@ -536,17 +562,27 @@ CREATE INDEX idx_vote_created ON poll_votes ( created );-- --
 CREATE INDEX idx_vote_poll ON poll_votes ( poll_id );-- --
 CREATE INDEX idx_vote_user ON poll_votes ( user_id );-- --
 
+CREATE VIEW category_view AS SELECT 
+	cats.id AS category_id, 
+	cats.parent_id AS category_parent, 
+	cats.title AS category_title, 
+	cats.sort_order AS category_sort, 
+	cats.settings AS category_settings, 
+	casts.status AS category_status 
+	
+	FROM categories cats;
 
 CREATE VIEW forum_view AS SELECT
-	cats.id AS id,
-	cats.title AS title,
-	cats.parent_id AS parent_id,
-	cats.description AS description,
-	cats.topic_count AS topic_count, 
-	cats.reply_count AS reply_count,
-	cats.sort_order AS sort_order,
-	cats.status AS status,
-	cats.settings AS forum_settings,
+	forums.id AS id,
+	forums.title AS title,
+	forums.parent_id AS parent_id,
+	forums.description AS description,
+	forums.topic_count AS topic_count, 
+	forums.reply_count AS reply_count,
+	forums.sort_order AS sort_order,
+	forums.status AS status,
+	forums.settings AS forum_settings,
+	forums.category_id AS forum_category,
 	
 	GROUP_CONCAT( subs.id, ',' ) AS sub_ids,
 	GROUP_CONCAT( subs.status, ',' ) AS sub_status,
@@ -587,16 +623,21 @@ CREATE VIEW forum_view AS SELECT
 	ruser.settings AS last_reply_user_settings,
 	ruser.status AS last_reply_user_status
 	
-	FROM forums cats 
-	LEFT JOIN forums subs ON cats.id = subs.parent_id
-	LEFT JOIN posts topics ON cats.last_topic_id = topics.id
-	LEFT JOIN posts replies ON cats.last_reply_id = replies.id 
+	FROM forums
+	LEFT JOIN forums subs ON forums.id = subs.parent_id
+	LEFT JOIN posts topics ON forums.last_topic_id = topics.id
+	LEFT JOIN posts replies ON forums.last_reply_id = replies.id 
 	
 	LEFT JOIN users tuser ON topics.user_id = tuser.id
 	LEFT JOIN user_auth tlast ON topics.user_id = tlast.user_id 
 	
 	LEFT JOIN users ruser ON replies.user_id = ruser.id
 	LEFT JOIN user_auth rlast ON replies.user_id = rlast.user_id;-- --
+
+CREATE VIEW home_view AS 
+	SELECT * FROM category_view
+	LEFT JOIN forum_view ON 
+		category_view.category_id = forum_view.forum_category;-- --
 
 CREATE VIEW forum_summary_view AS SELECT
 	id, title, description, sort_order, topic_count, 
