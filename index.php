@@ -10986,7 +10986,8 @@ function loadTemplates( string $event, array $hook, array $params ) {
 	// Current theme name and theme directory
 	// Convention: THEMES/THEME/file.tpl
 	$theme	= config( 'theme', \THEME );
-	$tdir	= slashPath( $theme, true );
+	$tdir	= 
+	slashPath( \THEMES, true ) . slashPath( $theme, true );
 	
 	// TODO: Override class placeholders in 'default_classes'
 	
@@ -11001,7 +11002,7 @@ function loadTemplates( string $event, array $hook, array $params ) {
 		
 		// Template file from theme folder
 		$data	= 
-		loadFile( $tdir . $t . '.tpl', \THEMES, false );
+		loadFile( $t . '.tpl', $tdir, false );
 		
 		if ( empty( $data ) ) {
 			$err[] = $t;
