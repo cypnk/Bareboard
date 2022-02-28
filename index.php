@@ -2950,18 +2950,33 @@ function backupFile(
 }
 
 /**
- *  Load file contents and check for any server-side code		
+ *  Load file contents and check for any server-side code
+ *   
+ *  @param string	$file	File name relative to root path
+ *  @param string	$root	File location, defaults to CACHE
+ *  @param bool		$rem	Store loaded file contents if true
+ *  @return string		
  */
-function loadFile( string $name ) : string {
+function loadFile( 
+	string	$name, 
+	string	$root	= \CACHE,
+	bool	$rem	= true
+) : string {
 	static $loaded	= [];
 	
 	// Check if already loaded
-	if ( isset( $loaded[$name] ) ) {
+	if ( isset( $loaded[$name] ) && $rem ) {
 		return $loaded[$name];
 	}
 	
 	// Relative path to storage
-	$fname	= \CACHE . $name;
+	$fname	= slashPath( $root, true ) . $name;
+	
+	// Check folder location
+	if ( empty( filterDir( $fname, $root ) ) ) {
+		return '';
+	}
+	
 	if ( !\file_exists( $fname ) ) {
 		return '';
 	}
@@ -2995,7 +3010,9 @@ function loadFile( string $name ) : string {
 		send( 500, \MSG_CODEDETECT );
 	}
 	
-	$loaded[$name] = $data;
+	if ( $rem ) {
+		$loaded[$name] = $data;
+	}
 	
 	return $data;
 }
@@ -10954,40 +10971,6 @@ function changePassForm( int $id, int &$status ) : array {
  *  Themes and templates
  */
 
-/**
- *  Template file loading helper
- *  
- *  @param string	$fdir	Theme folder
- *  @param string	$t	Template name
- *  @param array	$err	Loading error holder
- *  @return string
- */
-function templateFile( string $fdir, string $t, array &$err ) : string {
-	
-	// Template file from theme folder
-	$fname	= $fdir . $t . '.tpl';
-	
-	if ( empty( filterDir( $fname, \THEMES ) ) ) {
-		// Invalid template location
-		$err[] = $t;
-		return '';
-	}
-	
-	// Only load existing templates
-	if ( !\is_readable( $fname ) ) {
-		$err[] = $t;
-		return '';
-	}
-	
-	$data = \file_get_contents( $fname );
-	
-	// Nothing loaded?
-	if ( false === $data ) {
-		$err[] = $t;
-		return '';
-	}
-	return $data;
-}
 
 /**
  *  Load configuration defined theme and override default templates
@@ -11003,8 +10986,7 @@ function loadTemplates( string $event, array $hook, array $params ) {
 	// Current theme name and theme directory
 	// Convention: THEMES/THEME/file.tpl
 	$theme	= config( 'theme', \THEME );
-	$fdir	= 
-	slashPath( slashPath( \THEMES, true ) . $theme, true );
+	$tdir	= slashPath( $theme, true );
 	
 	// TODO: Override class placeholders in 'default_classes'
 	
@@ -11017,8 +10999,12 @@ function loadTemplates( string $event, array $hook, array $params ) {
 			continue;
 		}
 		
-		$data		= templateFile( $fdir, $t, $err );
+		// Template file from theme folder
+		$data	= 
+		loadFile( $tdir . $t . '.tpl', \THEMES, false );
+		
 		if ( empty( $data ) ) {
+			$err[] = $t;
 			continue;
 		}
 		$loaded[$t]	= pacify( $data );
@@ -11033,8 +11019,9 @@ function loadTemplates( string $event, array $hook, array $params ) {
 	if ( !empty( $err ) ) {
 		shutdown( 
 			'logError', 
-			'Error loading ' . $theme . ' theme file(s): ' . 
-				implode( ' ' . $err ) 
+			'Error loading ' . $theme . 
+				' theme file(s): ' . 
+				implode( ' ', $err ) 
 		);
 	}
 	return \array_merge( $hook, $params );
