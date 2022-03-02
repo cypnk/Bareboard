@@ -830,15 +830,15 @@ HTML;
 // Search form
 $templates['tpl_searchform']	= <<<HTML
 {before_search_form}<form action="{home}" method="get" 
-	class="{form_classes} {search_form_classes}">
+	class="{search_form_classes}">
 	<fieldset class="{search_fieldset_classes}">
 {xsrf}
 {before_search_input}<input type="search" name="find" 
 	placeholder="{lang:forms:search:placeholder}" 
-	class="{input_classes} {search_input_classes}" 
+	class="{search_input_classes}" 
 	required>{after_search_input} 
 {before_search_button}
-<input type="submit" class="{submit_classes} {search_button_classes}" 
+<input type="submit" class="{search_button_classes}" 
 	value="{lang:forms:search:button}">{after_search_button}
 	</fieldset>
 </form>{after_search_form}
@@ -868,7 +868,7 @@ $templates['tpl_login_page']	= <<<HTML
 		{login_pass_input_before}<input id="loginpass" type="password" class="{input_classes}" aria-describedby="loginpass-desc" name="password" maxlength="4096" pattern="([^\s][\w\s]{{pass_min},4096})" required>{login_pass_input_after}
 		{login_pass_desc_before}<small id="loginpass-desc" class="{desc_classes}">{lang:forms:login:passdesc}</small>{login_pass_desc_after}
 	</p>
-	<p>{login_rem_label_before}<label class="ib">{login_rem_input_before}<input type="checkbox" name="rem" value="1">{login_rem_input_after} {lang:forms:login:rem}</label>{login_rem_label_after}</p>
+	<p>{login_rem_label_before}<label class="{check_label_classes}">{login_rem_input_before}<input type="checkbox" name="rem" value="1">{login_rem_input_after} {lang:forms:login:rem}</label>{login_rem_label_after}</p>
 	<p><input type="submit" class="{submit_classes}" value="{lang:forms:login:submit}"></p>
 </form>
 </main>
@@ -906,8 +906,8 @@ $templates['tpl_register_page']	= <<<HTML
 		{register_passr_desc_before}<small id="passrepeat-desc" class="{desc_classes}">{lang:forms:register:repeatdesc}</small>{register_passr_desc_after}
 	</p>
 	<p>
-		{register_terms_label_before}<label class="ib right">{register_terms_input_before}<input type="checkbox" name="terms" value="1" required>{register_terms_input_after} {lang:forms:register:terms}</label>{register_terms_label_after} 
-		{register_rem_label_before}<label class="ib right">{register_rem_input_before}<input type="checkbox" name="rem" value="1">{register_rem_input_after} {lang:forms:register:rem}</label>{register_rem_label_after} 
+		{register_terms_label_before}<label class="{check_label_classes}">{register_terms_input_before}<input type="checkbox" name="terms" value="1" required>{register_terms_input_after} {lang:forms:register:terms}</label>{register_terms_label_after} 
+		{register_rem_label_before}<label class="{check_label_classes}">{register_rem_input_before}<input type="checkbox" name="rem" value="1">{register_rem_input_after} {lang:forms:register:rem}</label>{register_rem_label_after} 
 		<input type="submit" class="{submit_classes}" value="{lang:forms:register:submit}"></p>
 </form>
 </main>
@@ -1133,7 +1133,7 @@ $templates['tpl_moduser_comment']	= <<<HTML
 	</header>
 	<section class="{post_body_wrap_classes}>{body}</section>
 	<footer>
-		<label class="func">
+		<label class="{check_label_classes} func">
 			<input type="checkbox" name="select[]" value="{id}"> 
 			{lang:mod:usercontent:select}
 		</label>
@@ -1152,7 +1152,7 @@ $templates['tpl_modanon_comment']	= <<<HTML
 	</header>
 	<section class="{post_body_wrap_classes}>{body}</section>
 	<footer>
-		<label class="func">
+		<label class="{check_label_classes} func">
 			<input type="checkbox" name="select[]" value="{id}"> 
 			{lang:mod:usercontent:select}
 		</label>
@@ -1188,7 +1188,7 @@ $templates['tpl_anonpost_form']	= <<<HTML
 		{post_name_input_before}<input id="authorname" type="text" class="{input_classes}" aria-describedby="authorname-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{post_name_input_before}
 		{post_name_desc_before}<small id="authorname-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{anonpost_name_desc_before}
 	</p>
-	<p><label class="ib right"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
+	<p><label class="{check_label_classes}"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
 		<input type="submit" class="{submit_classes}" value="{lang:forms:anonpost:submit}"></p>
 </form>
 HTML;
@@ -1280,7 +1280,7 @@ $templates['tpl_anonreply_form'] = <<<HTML
 		{post_name_input_before}<input id="postauthor" type="text" class="{input_classes}" aria-describedby="postauthor-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{post_name_input_after}
 		{post_name_desc_before}<small id="postauthor-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{post_name_desc_after}
 	</p>
-	<p class="{field_wrap_classes}"><label class="ib right"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
+	<p class="{field_wrap_classes}"><label class="{check_label_classes}"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
 		<input type="submit" class="{submit_classes}" value="{lang:forms:anonpost:submit}"></p>
 </form>
 HTML;
