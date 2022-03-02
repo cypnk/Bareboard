@@ -796,6 +796,54 @@ $templates['tpl_error_page']	= <<<HTML
 </html>
 HTML;
 
+// Home page specific heading
+$templates['tpl_home_heading']	= <<<HTML
+{before_home_heading}<header class="{heading_classes}">
+<div class="{heading_wrap_classes}">
+<h1 class="{heading_h_classes}">
+	<a href="{home}" class="{heading_a_classes}">{page_title}</a>
+</h1>
+<p class="{tagline_classes}">{tagline}</p>
+{home_links}
+<div class="{search_form_wrap_classes}">{search_form}</div>
+{heading_after}
+</div>
+</header>{after_home_heading}
+HTML;
+
+// Generic page heading (about, help etc...)
+$templates['tpl_page_heading']	= <<<HTML
+{before_page_heading}<header class="{heading_classes}">
+<div class="{heading_wrap_classes}">{before_heading_h}
+<h1 class="{heading_h_classes}">
+	<a href="{home}" class="{heading_a_classes}">{page_title}</a>
+</h1>{after_heading_h}
+<p class="{tagline_classes}">{tagline}</p>
+{page_links}
+<div class="{search_form_wrap_classes}">{search_form}</div>
+{heading_after}
+</div>
+</header>{after_page_heading}
+HTML;
+
+
+// Search form
+$templates['tpl_searchform']	= <<<HTML
+{before_search_form}<form action="{home}" method="get" 
+	class="{form_classes} {search_form_classes}">
+	<fieldset class="{search_fieldset_classes}">
+{xsrf}
+{before_search_input}<input type="search" name="find" 
+	placeholder="{lang:forms:search:placeholder}" 
+	class="{input_classes} {search_input_classes}" 
+	required>{after_search_input} 
+{before_search_button}
+<input type="submit" class="{submit_classes} {search_button_classes}" 
+	value="{lang:forms:search:button}">{after_search_button}
+	</fieldset>
+</form>{after_search_form}
+HTML;
+
 // User login page
 $templates['tpl_login_page']	= <<<HTML
 <!DOCTYPE html>
