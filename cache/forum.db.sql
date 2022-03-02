@@ -147,7 +147,7 @@ CREATE TABLE user_auth(
 		FOREIGN KEY ( user_id ) 
 		REFERENCES users ( id )
 		ON DELETE CASCADE
-);
+);-- --
 CREATE UNIQUE INDEX idx_user_auth_id ON user_auth( user_id );-- --
 CREATE INDEX idx_user_ip ON user_auth( last_ip )
 	WHERE last_ip IS NOT NULL;-- --
@@ -570,7 +570,7 @@ CREATE VIEW category_view AS SELECT
 	cats.settings AS category_settings, 
 	casts.status AS category_status 
 	
-	FROM categories cats;
+	FROM categories cats;-- --
 
 CREATE VIEW forum_view AS SELECT
 	forums.id AS id,
@@ -739,7 +739,6 @@ CREATE VIEW thread_polls_view AS SELECT
 	JOIN polls ON po.poll_id = po.poll_id
 	LEFT JOIN poll_votes pv ON po.id = pv.option_id
 	LEFT JOIN users ON pv.user_id = users.id;-- --
-
 
 -- Quick messages
 CREATE TABLE chat(
