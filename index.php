@@ -9603,11 +9603,11 @@ function searchPagePath( array $data ) : string {
 /**
  *  Get common words in text for searching
  *  
- *  @param array	$lines		Content to process
+ *  @param string	$text		Content to process
  *  @param bool		$as_array	Returns as an array if true
  *  @return mixed
  */
-function getCommonWords( array $lines, bool $as_array = true ) {
+function getCommonWords( string $text, bool $as_array = true ) {
 	static $stop;
 	
 	// Exclude some English stop words
@@ -9659,9 +9659,6 @@ function getCommonWords( array $lines, bool $as_array = true ) {
 		
 	}
 	
-	// Make lines into a continous series of words
-	$text	= \implode( ' ', $lines );
-	
 	// str_word_count alternative for unicode
 	$words	= 
 	\preg_split( '/[^\p{L}\p{N}\']+/u', lowercase( $text ) );
@@ -9676,6 +9673,76 @@ function getCommonWords( array $lines, bool $as_array = true ) {
 	$words	= \array_unique( \array_keys( $fr ) );
 	
 	return $as_array ? $words : implode( ' ', $words );
+}
+
+/**
+ *  Get posts related to current one by content
+ *  
+ *  @param int		$id	Currently active post id
+ *  @param int		$mode	1 = Topics only , 2= Posts only, else both
+ *  @return array
+ */
+function getRelated( int $id, int $mode = 0 ) : array {
+	$res	= 
+	getResults( 
+		'SELECT title, bare FROM posts WHERE id = :id', 
+		[ ':id' => $id ],
+		\FORUM_DATA
+	);
+	
+	// No post?
+	if ( empty( $res ) ) {
+		return [];
+	}
+	
+	// Nothing to search
+	$text	= $res[0]['bare'] ?? '';
+	if ( empty( $text ) ) {
+		return [];
+	}
+	 
+	$title	= $res[0]['title'] ?? '';
+	
+	// Parse common words, excluding stop words and make search data
+	if ( empty( $title )  ) {
+		$words	= getCommonWords( $text, false );
+		$data	= searchData( $words );
+	} else {
+		$words	= getCommonWords( $title . ' ' . $text, false );
+		$data	= searchData( '"' . $title . '" ' . $words );
+	}
+	
+	// Excluding current
+	$rlimit	= config( 'related_limit', \RELATED_LIMIT, 'int' ) + 1;
+	
+	$sm	= '';
+	switch ( $mode ) {
+		case 1:
+			$sm = ' AND parent_id IS NULL ';
+			break;
+		case 2:
+			$sm = ' AND forum_id IS NULL ';
+			break;
+	}
+	
+	// Search for related content excluding current post
+	return 
+	getResults( 
+		"SELECT * FROM thread_view 
+			WHERE id IN ( SELECT DISTINCT docid 
+				FROM post_search WHERE post_search 
+				MATCH :find 
+				AND docid NOT IN ( :id ) 
+				ORDER by matchinfo( post_search ) DESC 
+				LIMIT :limit 
+			) {$sm} GROUP by post_since;",
+		[ 
+			':find'		=> $data, 
+			':id'		=> $id.
+			':limit'	=> $rlimit
+		],
+		\FORUM_DATA
+	);	
 }
 
 /**
