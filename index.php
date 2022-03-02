@@ -1141,7 +1141,7 @@ $templates['tpl_anonpost_form']	= <<<HTML
 		{post_name_desc_before}<small id="authorname-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{anonpost_name_desc_before}
 	</p>
 	<p><label class="ib right"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
-		<input type="submit" value="{lang:forms:anonpost:submit}"></p>
+		<input type="submit" class="{submit_classes}" value="{lang:forms:anonpost:submit}"></p>
 </form>
 HTML;
 
@@ -1162,7 +1162,7 @@ $templates['tpl_userpost_form']	= <<<HTML
 		{post_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{post_message_input_before}
 		{post_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:userpost:msgdesc}</small>{post_message_desc_after}
 	</p>
-	<p><input type="submit" value="{lang:forms:userpost:submit}"></p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:userpost:submit}"></p>
 </form>
 HTML;
 
@@ -1185,7 +1185,7 @@ $templates['tpl_editpost_form']	= <<<HTML
 		{edit_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:editpost:msgdesc}</small>{edit_message_desc_after}
 	</p>
 	
-	<p><input type="submit" value="{lang:forms:editpost:submit}"></p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:editpost:submit}"></p>
 </form>
 HTML;
 
@@ -1211,7 +1211,7 @@ $templates['tpl_anoneditpost_form']	= <<<HTML
 		{edit_name_input_before}<input id="authorname" type="text" class="{input_classes}" aria-describedby="authorname-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{edit_name_input_before}
 		{edit_name_desc_before}<small id="authorname-desc" class="{desc_classes}">{lang:forms:anonedit:namedesc}</small>{edit_name_desc_before}
 	</p>
-	<p><input type="submit" value="{lang:forms:anoneditpost:submit}"></p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:anoneditpost:submit}"></p>
 </form>
 HTML;
 
@@ -1233,7 +1233,7 @@ $templates['tpl_anonreply_form'] = <<<HTML
 		{post_name_desc_before}<small id="postauthor-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{post_name_desc_after}
 	</p>
 	<p class="{field_wrap_classes}"><label class="ib right"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
-		<input type="submit" value="{lang:forms:anonpost:submit}"></p>
+		<input type="submit" class="{submit_classes}" value="{lang:forms:anonpost:submit}"></p>
 </form>
 HTML;
 
@@ -1250,7 +1250,7 @@ $templates['tpl_userreply_form'] = <<<HTML
 		{post_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{post_message_input_after}
 		{post_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:userpost:msgdesc}</small>{post_message_desc_after}
 	</p>
-	<p><input type="submit" value="{lang:forms:userpost:submit}"></p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:userpost:submit}"></p>
 </form>
 HTML;
 
@@ -1266,7 +1266,7 @@ $templates['tpl_editpost_form'] = <<<HTML
 		{editpost_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{editpost_message_input_after}
 		{editpost_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:editpost:msgdesc}</small>{editpost_message_desc_after}
 	</p>
-	<p><input type="submit" value="{lang:forms:editpost:submit}"></p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:editpost:submit}"></p>
 </form>
 HTML;
 
@@ -1287,7 +1287,7 @@ $templates['tpl_anoneditpost_form'] = <<<HTML
 		{editpost_name_input_before}<input id="postauthor" type="text" class="{input_classes}" aria-describedby="postauthor-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{editpost_name_input_after}
 		{editpost_name_desc_before}<small id="postauthor-desc" class="{desc_classes}">{lang:forms:anonpost:namedesc}</small>{editpost_name_desc_after}
 	</p>
-	<p><input type="submit" value="{lang:forms:editpost:submit}"></p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:editpost:submit}"></p>
 </form>
 HTML;
 
