@@ -357,6 +357,20 @@ CREATE INDEX idx_post_pinned ON posts ( is_pinned );-- --
 CREATE INDEX idx_post_status ON posts ( status );-- --
 CREATE INDEX idx_post_sort ON posts ( sort_order );-- --
 
+CREATE TABLE post_stats (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	post_id INTEGER NOT NULL,
+	active_count INTEGER NOT NULL DEFAULT 0,
+	reply_count INTEGER NOT NULL DEFAULT 0,
+	view_count INTEGER NOT NULL DEFAULT 0,
+		
+	CONSTRAINT fk_post_stat
+		FOREIGN KEY ( post_id ) 
+		REFERENCES posts ( id ) 
+		ON DELETE CASCADE
+);-- --
+CREATE INDEX idx_post_stats ON post_stats ( post_id );-- --
+
 
 -- Post text searching
 CREATE VIRTUAL TABLE post_search 
@@ -379,6 +393,10 @@ BEGIN
 	INSERT INTO post_search( docid, body ) 
 		VALUES ( NEW.id, NEW.title || ' ' || NEW.bare );
 	
+	-- Topic stats
+	INSERT INTO post_stats( post_id ) 
+		VALUES ( NEW.id );
+	
 	UPDATE forums SET last_topic_id = NEW.id, 
 		topic_count = ( topic_count + 1 ) 
 		WHERE id = NEW.forum_id;
@@ -397,6 +415,13 @@ BEGIN
 	INSERT INTO post_search( docid, body ) 
 		VALUES ( NEW.id, NEW.bare );
 	
+	-- Reply stats
+	INSERT INTO post_stats( post_id ) 
+		VALUES ( NEW.id );
+	
+	UPDATE post_stats SET reply_count = ( reply_count + 1 )
+		WHERE post_id = NEW.parent_id;
+		
 	UPDATE forums SET last_reply_id = NEW.id, 
 		reply_count = ( reply_count + 1 ) 
 		WHERE id = ( 
@@ -482,6 +507,12 @@ BEGIN
 		WHERE id = 
 		( SELECT posts.forum_id FROM posts 
 			WHERE posts.id = OLD.parent_id LIMIT 1 );
+	
+	UPDATE post_stats SET reply_count = 
+		( SELECT COUNT( posts.id ) FROM posts
+			WHERE posts.parent_id = OLD.parent_id AND 
+			posts.id IS NOT OLD.id ) 
+			WHERE post_id = OLD.parent_id;
 END;-- --
 
 
@@ -597,6 +628,9 @@ CREATE VIEW forum_view AS SELECT
 	topics.author_ip AS last_topic_author_ip,
 	topics.is_pinned AS last_topic_is_pinned,
 	topics.status AS last_topic_status,
+	stats.active_count AS topic_active_count,
+	stats.reply_count AS topic_reply_count,
+	stats.view_count AS topic_view_count,
 	
 	tlast.last_ip AS last_topic_user_ip,
 	tlast.last_ua AS last_topic_user_ua,
@@ -627,6 +661,7 @@ CREATE VIEW forum_view AS SELECT
 	LEFT JOIN forums subs ON forums.id = subs.parent_id
 	LEFT JOIN posts topics ON forums.last_topic_id = topics.id
 	LEFT JOIN posts replies ON forums.last_reply_id = replies.id 
+	LEFT JOIN post_stats stats ON topics.id = stats.post_id
 	
 	LEFT JOIN users tuser ON topics.user_id = tuser.id
 	LEFT JOIN user_auth tlast ON topics.user_id = tlast.user_id 
@@ -657,6 +692,9 @@ CREATE VIEW thread_view AS SELECT
 	posts.is_pinned AS is_pinned,
 	posts.status AS status,
 	posts.sort_order AS sort_order,
+	stats.active_count AS active_count,
+	stats.reply_count AS reply_count,
+	stats.view_count AS view_count,
 	strftime( '%s', posts.created ) AS post_since,
 	
 	users.username AS username,
@@ -672,7 +710,8 @@ CREATE VIEW thread_view AS SELECT
 	
 	FROM posts
 	LEFT JOIN users ON posts.user_id = users.id 
-	LEFT JOIN user_auth ua ON users.id = ua.user_id;-- --
+	LEFT JOIN user_auth ua ON users.id = ua.user_id
+	LEFT JOIN post_stats stats ON posts.id = stats.post_id;-- --
 
 CREATE VIEW thread_sibling_view AS SELECT DISTINCT
 	posts.id AS id,
