@@ -11684,7 +11684,6 @@ function editReply(
 	);
 }
 
-
 /**
  *  Change pin status on or off on a topic
  *  
@@ -11738,6 +11737,49 @@ function postSort( int $id, int $sort ) : bool {
 		$sql, 
 		[ ':sort' => $status, ':id' => $id ], 
 		\FORUM_DATA 
+	);
+}
+
+/**
+ *  Increment view count on a post
+ *  
+ *  @param int		$id	Post unique identifier
+ */
+function postAddViewCount( int $id ) : bool {
+	static $sql	= 
+	"UPDATE post_stat_view SET view_count = 1 
+		WHERE post_id = :id";
+	
+	return setUpdate( $sql, [ ':id' => $id ], \FORUM_DATA );
+}
+
+/**
+ *  Increment reply count on a post
+ *  
+ *  @param int		$id	Post unique identifier
+ */
+function postAddReplyCount( int $id ) : bool {
+	static $sql	= 
+	"UPDATE post_stat_view SET reply_count = 1 
+		WHERE post_id = :id";
+	
+	return setUpdate( $sql, [ ':id' => $id ], \FORUM_DATA );
+}
+
+/**
+ *  Set currently browsing visitor count on a post
+ *  
+ *  @param int		$id	Post unique identifier
+ *  @param int		$num	Active visitor or user number
+ */
+function postSetActivityCount( int $id, int $num ) : bool {
+	static $sql	= 
+	"UPDATE post_stat_view SET active_count = :num
+		WHERE post_id = :id";
+	
+	return 
+	setUpdate( 
+		$sql, [ ':num' => $num, ':id' => $id ], \FORUM_DATA 
 	);
 }
 
@@ -12990,6 +13032,10 @@ function addForumRoutes( string $event, array $hook, array $params ) {
 	/**
 	 *  Poll routes
 	 */
+	[ 'get', 'poll/new/:id',		'newpoll' ],
+	[ 'post', 'poll/new',			'donewpoll' ],
+	[ 'get', 'poll/edit/:id',		'editpoll' ],
+	[ 'post', 'poll/edit',			'doeditpoll' ],
 	[ 'post', 'poll',			'dovote' ],
 	
 	/**
