@@ -371,6 +371,32 @@ CREATE TABLE post_stats (
 );-- --
 CREATE INDEX idx_post_stats ON post_stats ( post_id );-- --
 
+CREATE VIEW post_stat_view AS SELECT 
+	id, post_id, active_count, reply_count, view_count
+	FROM post_stats;-- --
+
+-- Set activity helpers
+CREATE TRIGGER post_view_count_set INSTEAD OF 
+	UPDATE OF view_count ON post_stat_view
+BEGIN 
+	UPDATE view_count = ( view_count + 1 ) 
+		WHERE post_id = NEW.post_id;
+END;-- --
+
+CREATE TRIGGER post_reply_count_set INSTEAD OF 
+	UPDATE OF reply_count ON post_stat_view
+BEGIN 
+	UPDATE reply_count = ( reply_count + 1 ) 
+		WHERE post_id = NEW.post_id;
+END;-- --
+
+CREATE TRIGGER post_active_count_set INSTEAD OF 
+	UPDATE OF active_count ON post_stat_view
+BEGIN 
+	UPDATE active_count = NEW.active_count 
+		WHERE post_id = NEW.post_id;
+END;-- --
+
 
 -- Post text searching
 CREATE VIRTUAL TABLE post_search 
