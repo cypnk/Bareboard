@@ -49,6 +49,14 @@
 			"biodesc"	: "Simple HTML and a subset of <a href=\"{formatting}\">Markdown<\/a> supported.",
 			"submit"	: "Save"
 		}, 
+		"forum"		: {
+			"page"		: "Forum",
+			"title"		: "Title <span>(required)<\/span>",
+			"titledesc"	: "Between 1 and 255 characters. Letters, numbers, and spaces supported.",
+			"description"	: "Description",
+			"descriptdesc"	: "Optional plain text description.",
+			"submit"	: "Save"
+		},
 		"anonpost"	: {
 			"page"		: "Create message",
 			"title"		: "Message title",
