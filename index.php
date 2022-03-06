@@ -559,6 +559,7 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"search_input_classes"		: "",
 	"search_button_classes"		: "",
 	
+	"forum_form_classes"		: "",
 	"login_form_classes"		: "",
 	"register_form_classes"		: "",
 	"password_form_classes"		: "",
@@ -979,6 +980,40 @@ $templates['tpl_profile_page']	= <<<HTML
 		{bio_desc_before}<small id="bio-desc" class="{desc_classes}">{lang:forms:profile:biodesc}</small>{bio_desc_after}
 	</p>
 	<p><input type="submit" class="{submit_classes}" value="{lang:forms:profile:submit}"></p>
+</form>
+</main>
+</body>
+</html>
+HTML;
+
+// New forum edit/create page
+$templates['tpl_forum_page']	= <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{lang:forms:forum:page}</title>
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body class="{body_classes}">
+<main class="{body_main_classes}">
+<form action="{action}" method="post" class="{form_classes} {forum_form_classes}" id="forum_form">
+	<input type="hidden" name="id" value="{id}">
+	<input type="hidden" name="parent_id" value="{parent_id}">
+	<input type="hidden" name="token" value="{token}">
+	<input type="hidden" name="nonce" value="{nonce}">
+	<input type="hidden" name="meta" value="{meta}">
+	<p class="{field_wrap_classes}">
+		{title_label_before}<label for="title" class="{label_classes}">{lang:forms:forum:title}</span></label>{title_label_after} 
+		{title_input_before}<input id="title" type="text" class="{input_classes}" aria-describedby="title-desc" name="title" maxlength="255" pattern="([^\s][A-z0-9À-ž\s]+){1,255}" value="{title}" required>{title_input_after}
+		{title_desc_before}<small id="title-desc" class="{desc_classes}">{lang:forms:forum:titledesc}</small>{title_desc_after}
+	</p>
+	<p class="{field_wrap_classes}">
+		{description_label_before}<label for="description" class="{label_classes}">{lang:forms:forum:description}</span></label>{description_label_after} 
+		{description_input_before}<textarea id="description" name="description" rows="3" cols="60" class="{input_classes}" aria-describedby="description-desc">{description}</textarea>{description_input_after} 
+		{description_desc_before}<small id="description-desc" class="{desc_classes}">{lang:forms:forum:descriptdesc}</small>{description_desc_after}
+	</p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:forum:submit}"></p>
 </form>
 </main>
 </body>
@@ -11207,7 +11242,10 @@ function topicForm( int $forum_id, int &$status ) : array {
  *  @return array
  */
 function forumForm( int $id, int $parent, int &$status ) : array {
-	$status	= validateForm( 'forum' );
+	$status	= 
+	validateForm( 
+		'forum', false, true, [ 'id=' . $id, 'parent=' . $parent ] 
+	);
 	
 	if ( $status != \FORM_STATUS_VALID ) { 
 		return [];
@@ -11221,7 +11259,6 @@ function forumForm( int $id, int $parent, int &$status ) : array {
 				'min_range'	=> 1
 			]
 		],
-		[
 		'parent_id'		=> [
 			'filter'	=> \FILTER_VALIDATE_INT,
 			'options'	=> [
@@ -11317,6 +11354,67 @@ function newForum(
 			':sort'		=> $sort ?? 0
 		], 
 		\FORUM_DATA 
+	);
+}
+
+/**
+ *  Generate forum detail edit page
+ *  
+ *  @param string	$action		Postback location URL
+ *  @param int		$id		Optional forum unique identifier
+ *  @param int		$parent		Optional parent forum
+ *  @param string	$title		Forum name or empty if new
+ *  @param string	$desc		Detail description or empty if new
+ *  @return string
+ */
+function forumEditPage( 
+	string		$action, 
+	?int		$id	= null, 
+	?int		$parent = null, 
+	?string		$title	= null,
+	?string		$desc	= null
+) : string {
+	// Forum XSRF
+	$id	?= 0;
+	$parent ?= 0;
+	$pair	= 
+	genNoncePair( 'forum', [ 'id=' . $id, 'parent=' . $parent ] );
+	
+	$title	?= '';
+	$desc	?= '';
+	
+	return 
+	hookWrap( 
+		'beforeforumepage',
+		'afterforumpage',
+		template( 'tpl_forum_page' ), 
+		[ 
+			// Metadata
+			'nonce'				=> $pair['nonce'], 
+			'token'				=> $pair['token'],
+			'meta'				=> $pair['meta'],
+			'id'				=> $id,
+			'parent_id'			=> $parent,
+			
+			'action'			=> $action,
+			
+			// Placeholders
+			'title_label_before'		=> '',
+			'title_label_after'		=> '',
+			'title_input_before'		=> '',
+			'title_input_after'		=> '',
+			'title_desc_before'		=> '',
+			'title_desc_after'		=> '',
+			'title'				=> $title
+			
+			'description_label_before'	=> '',
+			'description_label_after'	=> '',
+			'description_input_before'	=> '',
+			'description_input_after'	=> '',
+			'description_desc_before'	=> '',
+			'description_desc_after'	=> '',
+			'description'			=> $desc
+		]
 	);
 }
 
@@ -12546,19 +12644,89 @@ function showForumRoute( string $event, array $hook, array $params ) {
 		$id . ' index ' . $start );
 }
 
-// TODO: Create a new forum page
+// Create a new forum page
 function newForumRoute( string $event, array $hook, array $params ) {
 	$user	= verifyAuthLevel( \USER_STATUS_ADMIN );
+	$action = pageRoutePath( 'donewforum' );
+	
+	send( 200, forumEditPage( $action ) );
 }
 
-// TODO: Edit an existing forum
+// Edit an existing forum
 function editForumRoute( string $event, array $hook, array $params ) {
 	$user	= verifyAuthLevel( \USER_STATUS_ADMIN );
+	$id	= ( int ) ( $params['id'] ?? 0 );
+	if ( empty( $id ) ) {
+		sendNotFound();
+	}
+	
+	$data = 
+	getSingle( 
+		$id, 
+		"SELECT * FROM forum_summary_view WHERE id = :id", 
+		\FORUM_DATA 
+	);
+	
+	// No forum by that ID?
+	if ( empty( $data ) ) {
+		sendNotFound();
+	}
+	
+	$action	= pageRoutePath( 'doeditforum' );
+	send( 
+		200, 
+		forumEditPage( 
+			$action, $id, $data['parent'] ?? 0, 
+			$data['title'], $data['description'] 
+		) 
+	);
 }
 
-// TODO: Process forum editing/creating
+// Process forum editing/creating
 function doEditForumRoute( string $event, array $hook, array $params ) {
 	$user	= verifyAuthLevel( \USER_STATUS_ADMIN );
+	
+	$status	= \FORM_STATUS_VALID;
+	$id	= ( int ) ( $_POST['id'] ?? 0 );
+	$parent	= ( int ) ( $_POST['parent_id'] ?? 0 );
+	$data	= forumForm( $id, $parent, $status );
+	
+	if ( $status != \FORM_STATUS_VALID ) {
+		sendExpired();
+	}
+	
+	// Find if parent exists
+	if ( !empty( $parent ) ) {
+		if ( empty( getSingle( 
+			$parent, 
+			"SELECT status FROM forums WHERE id = :id",
+			\FORUM_DATA 
+		) ) ) {
+			sendNotFound();
+		}
+	}
+	
+	// New forum?
+	if ( empty( $id ) ) {
+		$id = newForum( 
+			$data['title'], 
+			$data['description'], 0, 
+			$parent 
+		);
+	
+	// Edit existing forum
+	} else {
+		$ok = 
+		editForum( $id, $data['title'], $data['description'] );
+		if ( !$ok ) {
+			// Error saving forum?
+			sendError( 500 );
+		}
+	}
+	
+	// Redirect to new forum page
+	$path = pageRoutePath( 'showforum', 'forum' );
+	redirect( 201, slashPath( $path, true ) . $id );
 }
 
 // TODO: Topic replies
