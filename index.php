@@ -445,9 +445,27 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"list_wrap_classes"		: "content", 
 	
 	"home_classes"			: "content",
-	"home_wrap_classes"			: "",
+	"home_wrap_classes"		: "",
 	"about_classes"			: "content",
 	"about_wrap_classes"		: "",
+	
+	"forum_cat_idx_wrap_classes"	: "",
+	"forum_cat_idx_classes"		: "",
+	"forum_cat_idx_h_classes"	: "",
+	"forum_idx_wrap_classes"	: "",
+	"forum_idx_classes"		: "",
+	"forum_idx_heading_classes"	: "",
+	"forum_idx_h_classes"		: "",
+	"forum_idx_a_classes"		: "",
+	"forum_idx_desc_classes"	: "",
+	"forum_idx_subs_classes"	: "",
+	"forum_idx_stats_classes"	: "",
+	"forum_idx_stats_p_classes"	: "",
+	"forum_idx_stats_t_classes"	: "",
+	"forum_idx_last_classes"	: "",
+	"forum_idx_stats_l_classes"	: "",
+	"forum_idx_author_a_classes"	: "",
+	"forum_idx_stats_l_classes"	: "",
 	
 	"post_index_wrap_classes"	: "content",
 	"post_index_ul_wrap_classes"	: "index",
@@ -774,9 +792,52 @@ $templates['tpl_paginate']	= '<nav class="{paginate_classes}">{out}</nav>';
 
 // Simple index
 $templates['tpl_index']		= <<<HTML
-	<li class="{post_index_item_classes}"><time 
-		class="{post_datetime_classes}" datetime="{date_utc}">{date_stamp}</time>
-		<a class="{post_index_item_link_classes}" href="{permalink}">{title}</a></li>
+<li class="{post_index_item_classes}"><time 
+	class="{post_datetime_classes}" datetime="{date_utc}">{date_stamp}</time>
+	<a class="{post_index_item_link_classes}" href="{permalink}">{title}</a></li>
+HTML;
+
+// Forum main listing wrapper
+$templates['tpl_forum_index']	= <<<HTML
+<ul class="{forum_cat_idx_wrap_classes}>{categories}</ul>
+HTML;
+
+// Forum category template
+$templates['tpl_forum_cat_classes']	= <<<HTML
+<li class="{forum_cat_idx_classes}">
+	<h2 class="{forum_cat_idx_h_classes}">{category}</h2>
+	<ul class="{forum_idx_wrap_classes}">{forums}</ul>
+</li>
+HTML;
+
+// Forum index template
+$templates['tpl_forum']		= <<<HTML
+<li class="{forum_idx_classes}">
+<div class="{forum_idx_heading_classes}">
+<h2 class="{forum_idx_h_classes}"><a class="{forum_idx_a}" 
+	href="{forum_link}">{title}</a></h4>
+	<span class="{forum_idx_desc_classes}">{description}</span>
+	<span class="{forum_idx_subs_classes}">{subforums}</span>
+</div>
+<div class="{forum_idx_stats_classes}">
+<span class="{forum_idx_stats_p_classes}">{lang:forum:postcount}</span>
+<span class="{forum_idx_stats_t_classes}">{lang:forum:topiccount}</span>
+</div>
+<div class="{forum_idx_last}_classes">{last}</div>
+</li>
+HTML;
+
+// Forum last stats detail
+$templates['tpl_forum_last_user']	= <<<HTML
+<strong class="{forum_idx_stats_l_classes}">{lang:forum:lastby}</strong> 
+	<a class="{forum_idx_author_a_classes}" href="{user_link}">{author}</a> 
+	{lang:forum:lastlink} 
+	{lang:forum:lastdate}
+HTML;
+
+$templates['tpl_forum_last_anon']	= <<<HTML
+<strong class="{forum_idx_stats_l_classes}">{lang:forum:lastby}</strong> {author}
+	{lang:forum:lastdate}
 HTML;
 
 // Basic error page
