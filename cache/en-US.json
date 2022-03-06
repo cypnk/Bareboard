@@ -104,6 +104,14 @@
 		"feed"		: "Feed",
 		"help"		: "Help"
 	}, 
+	"forum"		: {
+		"subforums"	: "Subforums {forums}",
+		"topiccount"	: "{topic_count} Topics",
+		"postcount"	: "{post_count} Posts",
+		"lastby"	: "by",
+		"lastdate"	: "on {date_utc}",
+		"lastlink"	: "<a href=\"{post_link}\">{post_title}</a>"
+	},
 	"errors"	: {
 		"error"		: "Error",
 		"generic"	: "An error has occured",
