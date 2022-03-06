@@ -131,6 +131,7 @@ CREATE TABLE user_auth(
 	last_login DATETIME DEFAULT NULL,
 	last_pass_change DATETIME DEFAULT NULL,
 	last_lockout DATETIME DEFAULT NULL,
+	last_session_id TEXT DEFAULT NULL,
 	
 	-- Auth status,
 	is_approved INTEGER NOT NULL DEFAULT 0,
@@ -157,6 +158,8 @@ CREATE INDEX idx_user_active ON user_auth( last_active )
 	WHERE last_active IS NOT NULL;-- --
 CREATE INDEX idx_user_login ON user_auth( last_login )
 	WHERE last_login IS NOT NULL;-- --
+CREATE INDEX idx_user_session ON user_auth( last_session_id )
+	WHERE last_session_id IS NOT NULL;-- --
 CREATE INDEX idx_user_auth_approved ON user_auth( is_approved );-- --
 CREATE INDEX idx_user_auth_locked ON user_auth( is_locked );-- --
 CREATE INDEX idx_user_failed_last ON user_auth( failed_last_attempt )
@@ -357,6 +360,31 @@ CREATE INDEX idx_post_pinned ON posts ( is_pinned );-- --
 CREATE INDEX idx_post_status ON posts ( status );-- --
 CREATE INDEX idx_post_sort ON posts ( sort_order );-- --
 
+-- Browsing and read-view
+CREATE TABLE forum_browsing (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	session_id TEXT DEFAULT NULL COLLATE NOCASE,
+	forum_id INTEGER NOT NULL,
+	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		
+	CONSTRAINT fk_browsing_forum
+		FOREIGN KEY ( forum_id ) 
+		REFERENCES forums ( id ) 
+		ON DELETE CASCADE
+);-- --
+CREATE UNIQUE INDEX idx_forum_session ON 
+	forum_browsing ( session_id, forum_id );-- --
+CREATE INDEX idx_forum_session_id ON forum_browsing ( session_id );-- --
+CREATE INDEX idx_forum_session_created ON forum_browsing ( created DESC );-- --
+
+-- Delete old activity
+CREATE TRIGGER forum_browsing_gc AFTER INSERT ON forum_browsing FOR EACH ROW 
+BEGIN
+	DELETE FROM forum_browsing WHERE ( (
+		strftime( '%s', 'now' ) - 
+		strftime( '%s', 'created' ) ) > 3600 );
+END;-- --
+
 CREATE TABLE post_stats (
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 	post_id INTEGER NOT NULL,
@@ -379,22 +407,54 @@ CREATE VIEW post_stat_view AS SELECT
 CREATE TRIGGER post_view_count_set INSTEAD OF 
 	UPDATE OF view_count ON post_stat_view
 BEGIN 
-	UPDATE view_count = ( view_count + 1 ) 
+	UPDATE post_stats SET view_count = ( view_count + 1 ) 
 		WHERE post_id = NEW.post_id;
 END;-- --
 
 CREATE TRIGGER post_reply_count_set INSTEAD OF 
 	UPDATE OF reply_count ON post_stat_view
 BEGIN 
-	UPDATE reply_count = ( reply_count + 1 ) 
+	UPDATE post_stats SET reply_count = ( reply_count + 1 ) 
 		WHERE post_id = NEW.post_id;
 END;-- --
 
 CREATE TRIGGER post_active_count_set INSTEAD OF 
 	UPDATE OF active_count ON post_stat_view
 BEGIN 
-	UPDATE active_count = NEW.active_count 
+	UPDATE post_stats SET active_count = NEW.active_count 
 		WHERE post_id = NEW.post_id;
+END;-- --
+
+CREATE TABLE post_browsing (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	session_id TEXT DEFAULT NULL COLLATE NOCASE,
+	post_id INTEGER NOT NULL,
+	created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		
+	CONSTRAINT fk_browsing_post
+		FOREIGN KEY ( post_id ) 
+		REFERENCES posts ( id ) 
+		ON DELETE CASCADE
+);-- --
+CREATE UNIQUE INDEX idx_post_session ON 
+	post_browsing ( session_id, post_id );-- --
+CREATE INDEX idx_post_session_id ON post_browsing ( session_id );-- --
+CREATE INDEX idx_post_session_created ON post_browsing ( created DESC );-- --
+
+CREATE TRIGGER post_browsing_gc AFTER INSERT ON post_browsing FOR EACH ROW 
+BEGIN
+	DELETE FROM post_browsing WHERE ( (
+		strftime( '%s', 'now' ) - 
+		strftime( '%s', 'created' ) ) > 3600 );
+	
+	UPDATE post_stats SET active_count = ( 
+		SELECT COUNT ( id ) FROM post_browsing 
+			WHERE ( ( 
+			strftime( '%s', 'now' ) - 
+			strftime( '%s', 'created' ) ) <= 3600 ) AND 
+			post_browsing.id = NEW.post_id
+		) WHERE post_id = NEW.post_id;
+		
 END;-- --
 
 
