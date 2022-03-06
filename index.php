@@ -10071,12 +10071,14 @@ function updateUserActivity(
 			$sql	= 
 			"UPDATE auth_activity SET 
 				last_ip		= :ip, 
-				last_ua		= :ua  
+				last_ua		= :ua, 
+				last_session_id = :sess 
 				WHERE user_id = :id;";
 			
 			$params = [
 				':ip'	=> getIP(), 
-				':ua'	=> getUA(),
+				':ua'	=> getUA(), 
+				':sess'	=> \session_id(), 
 				':id'	=> $id
 			];
 			break;
@@ -10086,13 +10088,15 @@ function updateUserActivity(
 			"UPDATE auth_activity SET 
 				last_ip		= :ip, 
 				last_ua		= :ua, 
-				last_login	= :login 
+				last_login	= :login, 
+				last_session_id = :sess 
 				WHERE user_id = :id;";
 			
 			$params = [
 				':ip'		=> getIP(), 
 				':ua'		=> getUA(),
 				':login'	=> $now,
+				':sess'		=> \session_id(),
 				':id'		=> $id
 			];
 			break;
@@ -10104,7 +10108,8 @@ function updateUserActivity(
 				last_ip			= :ip, 
 				last_ua			= :ua, 
 				last_active		= :active,
-				last_pass_change	= :change 
+				last_pass_change	= :change, 
+				last_session_id		= :sess 
 				WHERE user_id = :id;";
 			
 			$params = [
@@ -10112,6 +10117,7 @@ function updateUserActivity(
 				':ua'		=> getUA(),
 				':active'	=> $now,
 				':change'	=> $now,
+				':sess'		=> \session_id(),
 				':id'		=> $id
 			];
 			break;
@@ -11784,6 +11790,31 @@ function postSetActivityCount( int $id, int $num ) : bool {
 }
 
 /**
+ *  Set currently browsing session activity on a post or forum
+ *  
+ *  @param int		$id		Unique identifier
+ *  @param bool		$post		Update post session if true or else forum
+ */
+function setBrowsingSession( int $id, bool $post ) : int {
+	static $psql	= 
+	"REPLACE INTO post_browsing ( session_id, post_id ) 
+		VALUES ( :sess, :id );";
+		
+	static $fsql	= 
+	"REPLACE INTO forum_browsing ( session_id, forum_id ) 
+		VALUES ( :sess, :id );";
+	
+	sessionCheck();
+	
+	return 
+	setInsert(
+		$post ? $psql : $fsql, 
+		[ ':sess' => \session_id(), ':id' => $id ], 
+		\FORUM_DATA 
+	);
+}
+
+/**
  *  Change anonymous author information
  *   
  *  @param int		$id	Post or topic unique identifier
@@ -12510,6 +12541,7 @@ function showForumRoute( string $event, array $hook, array $params ) {
 			$id . ' index ' . $start );
 	}
 	
+	setBrowsingSession( $id, false );
 	send( 200, 'Forum page (pinned first) ' . 
 		$id . ' index ' . $start );
 }
@@ -12543,6 +12575,7 @@ function showTopicRoute( string $event, array $hook, array $params ) {
 			$id . ' index ' . $start );
 	}
 	
+	setBrowsingSession( $id, true );
 	send( 200, 'Topic page ' . $id . ' index ' . $start );
 }
 
@@ -12639,6 +12672,7 @@ function showPostRoute( string $event, array $hook, array $params ) {
 		send( 200, 'Cached post page ' . $id );
 	}
 	
+	setBrowsingSession( $id, true );
 	send( 200, 'Show post page : ' . $id );
 }
 
