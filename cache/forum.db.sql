@@ -177,6 +177,7 @@ SELECT user_id,
 	last_active,
 	last_login,
 	last_lockout,
+	last_session_id,
 	last_pass_change,
 	failed_attempts,
 	failed_last_start,
@@ -193,6 +194,7 @@ BEGIN
 	UPDATE user_auth SET 
 		last_ip			= NEW.last_ip,
 		last_ua			= NEW.last_ua,
+		last_session_id		= NEW.last_session_id,
 		last_login		= CURRENT_TIMESTAMP, 
 		last_active		= CURRENT_TIMESTAMP,
 		failed_attempts		= 0
@@ -205,6 +207,7 @@ BEGIN
 	UPDATE user_auth SET 
 		last_ip			= NEW.last_ip, 
 		last_ua			= NEW.last_ua,
+		last_session_id		= NEW.last_session_id,
 		last_active		= CURRENT_TIMESTAMP 
 		WHERE id = OLD.id;
 END;-- --
@@ -232,6 +235,7 @@ BEGIN
 	UPDATE user_auth SET 
 		last_ip			= NEW.last_ip, 
 		last_ua			= NEW.last_ua,
+		last_session_id		= NEW.last_session_id,
 		last_active		= CURRENT_TIMESTAMP,
 		failed_last_attempt	= CURRENT_TIMESTAMP, 
 		failed_attempts		= ( failed_attempts + 1 ) 
