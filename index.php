@@ -10223,13 +10223,15 @@ function updateUserActivity(
 			"UPDATE auth_activity SET 
 				last_ip			= :ip, 
 				last_ua			= :ua, 
-				failed_last_attempt	= :fdate 
+				last_session_id		= :sess, 
+				failed_last_attempt	= :fdate
 				WHERE user_id = :id;";
 				
 			$params = [
 				':ip'		=> getIP(), 
 				':ua'		=> getUA(),
-				':change'	=> $now,
+				':sess'		=> \session_id(),
+				':fdate'	=> $now,
 				':id'		=> $id
 			];
 			break;
@@ -10274,12 +10276,13 @@ function updateUserActivity(
 			setInsert( 
 				"REPLACE INTO user_auth ( 
 					user_id, last_ip, last_ua, 
-					is_approved
-				) VALUES( :id, :ip, :ua, :ap );", 
+					last_session_id, is_approved
+				) VALUES( :id, :ip, :ua, :sess, :ap );", 
 				[
 					':id'	=> $id, 
 					':ip'	=> getIP(), 
 					':ua'	=> getUA(),
+					':sess'	=> \session_id(),
 					':ap'	=> $ap ? 1 : 0
 				], 
 				\FORUM_DATA 
