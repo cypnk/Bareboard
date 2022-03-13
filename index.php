@@ -5044,6 +5044,17 @@ function session( $reset = false ) {
 }
 
 /**
+ *  Session ID helper 
+ *  
+ *  @return string
+ */
+function sessionID() : string {
+	sessionCheck();
+	return \session_id();
+}
+
+
+/**
  *  Mark certain URIs as disabled for throttling
  * 
  *  @param mixed	$path	Disabled path(s)
@@ -10174,7 +10185,7 @@ function updateUserActivity(
 			$params = [
 				':ip'	=> getIP(), 
 				':ua'	=> getUA(), 
-				':sess'	=> \session_id(), 
+				':sess'	=> sessionID(), 
 				':id'	=> $id
 			];
 			break;
@@ -10192,7 +10203,7 @@ function updateUserActivity(
 				':ip'		=> getIP(), 
 				':ua'		=> getUA(),
 				':login'	=> $now,
-				':sess'		=> \session_id(),
+				':sess'		=> sessionID(),
 				':id'		=> $id
 			];
 			break;
@@ -10213,7 +10224,7 @@ function updateUserActivity(
 				':ua'		=> getUA(),
 				':active'	=> $now,
 				':change'	=> $now,
-				':sess'		=> \session_id(),
+				':sess'		=> sessionID(),
 				':id'		=> $id
 			];
 			break;
@@ -10230,7 +10241,7 @@ function updateUserActivity(
 			$params = [
 				':ip'		=> getIP(), 
 				':ua'		=> getUA(),
-				':sess'		=> \session_id(),
+				':sess'		=> sessionID(),
 				':fdate'	=> $now,
 				':id'		=> $id
 			];
