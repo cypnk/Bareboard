@@ -67,10 +67,11 @@ SELECT
 	logins.updated AS updated, 
 	users.status AS status, 
 	users.username AS name,
-	users.password AS password,
-	users.settings AS user_settings,
+	users.password AS password, 
+	users.settings AS user_settings, 
 	ua.is_approved AS is_approved, 
-	ua.is_locked AS is_locked
+	ua.is_locked AS is_locked, 
+	ua.expires AS expires
 	
 	FROM logins
 	JOIN users ON logins.user_id = users.id
