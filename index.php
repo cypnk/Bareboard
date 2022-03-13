@@ -10062,7 +10062,7 @@ function newUser(
 		$sql, 
 		[
 			':username'	=> $name,
-			':user_clean'	=> $clean, 
+			':user_clean'	=> cleanUsername( $name ),
 			':password'	=> hashPassword( $password ), 
 			':email'	=> $email, 
 			':display'	=> $display ?? '',
@@ -10665,8 +10665,14 @@ function processLogin( array $data, string $path, int &$status ) {
 			// "Remember me"
 			$rem	=  ( bool ) ( $data['rem'] ?? 0 );
 			
+			// Format auth user
+			$user	= formatAuthUser( $user );
+			
 			// Set login session
-			setAuth( formatAuthUser( $user ), $rem );
+			setAuth( $user, $rem );
+			
+			// Set login activity
+			updateUserActivity( $user['id'], 'login' );
 			
 			// Redirect to path
 			sendPage( $path, 202 );
