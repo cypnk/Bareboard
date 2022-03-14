@@ -270,6 +270,27 @@ CREATE INDEX idx_cat_parent ON categories ( parent_id );-- --
 CREATE INDEX idx_cat_sort ON categories ( sort_order );-- --
 CREATE INDEX idx_cat_status ON categories ( status );-- --
 
+CREATE VIRTUAL TABLE category_search 
+	USING fts4( body, tokenize=unicode61 );-- --
+
+CREATE TRIGGER category_insert AFTER INSERT ON categories FOR EACH ROW 
+BEGIN
+	INSERT INTO category_search( docid, body ) 
+		VALUES ( NEW.id, NEW.title );
+END;-- --
+
+CREATE TRIGGER category_update AFTER UPDATE ON categories FOR EACH ROW 
+BEGIN
+	REPLACE INTO category_search( docid, body ) 
+		VALUES( NEW.id, NEW.title );
+END;-- --
+
+CREATE TRIGGER category_delete BEFORE DELETE ON categories FOR EACH ROW 
+BEGIN
+	DELETE FROM category_search WHERE docid = OLD.id;
+END;-- --
+
+
 -- Discussion forums
 CREATE TABLE forums(
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -308,6 +329,27 @@ CREATE INDEX idx_forum_last_topic_id ON forums ( last_topic_id )
 CREATE INDEX idx_forum_last_reply_id ON forums ( last_reply_id )
 	WHERE last_reply_id IS NOT NULL;-- --
 
+CREATE VIRTUAL TABLE forum_search 
+	USING fts4( body, tokenize=unicode61 );-- --
+
+CREATE TRIGGER forum_insert AFTER INSERT ON forums FOR EACH ROW 
+BEGIN
+	INSERT INTO forum_search( docid, body ) 
+		VALUES ( NEW.id, NEW.title || ' ' || NEW.description );
+END;-- --
+
+CREATE TRIGGER forum_update AFTER UPDATE ON forums FOR EACH ROW 
+BEGIN
+	REPLACE INTO forum_search( docid, body ) 
+		VALUES( NEW.id, NEW.title || ' ' || NEW.description );
+END;-- --
+
+CREATE TRIGGER forum_delete BEFORE DELETE ON forums FOR EACH ROW 
+BEGIN
+	DELETE FROM forum_search WHERE docid = OLD.id;
+END;-- --
+
+
 -- Topics and replies
 CREATE TABLE posts(
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -332,7 +374,7 @@ CREATE TABLE posts(
 	is_pinned INTEGER NOT NULL DEFAULT 0,
 	sort_order INTEGER NOT NULL DEFAULT 0,
 	status INTEGER NOT NULL DEFAULT 0,
-		
+	
 	CONSTRAINT fk_post_cat
 		FOREIGN KEY ( forum_id ) 
 		REFERENCES forums ( id ) 
@@ -355,12 +397,8 @@ CREATE INDEX idx_post_user ON posts ( user_id )
 	WHERE user_id IS NOT NULL;-- --
 CREATE INDEX idx_post_author_ip ON posts ( author_ip ) 
 	WHERE author_ip IS NOT NULL;-- --
-CREATE INDEX idx_post_author_name ON posts ( author_name ) 
-	WHERE author_name IS NOT NULL;-- --
 CREATE INDEX idx_post_author_key ON posts ( author_key ) 
 	WHERE author_key IS NOT NULL;-- --
-CREATE INDEX idx_post_author_email ON posts ( author_email ) 
-	WHERE author_email IS NOT NULL;-- --
 CREATE INDEX idx_post_pinned ON posts ( is_pinned );-- --
 CREATE INDEX idx_post_status ON posts ( status );-- --
 CREATE INDEX idx_post_sort ON posts ( sort_order );-- --
@@ -467,6 +505,9 @@ END;-- --
 CREATE VIRTUAL TABLE post_search 
 	USING fts4( body, tokenize=unicode61 );-- --
 
+CREATE VIRTUAL TABLE post_author_search
+	USING fts4( body, tokenize=unicode61 );-- --
+
 CREATE TRIGGER post_update AFTER UPDATE ON posts FOR EACH ROW 
 BEGIN
 	UPDATE posts SET updated = CURRENT_TIMESTAMP 
@@ -476,6 +517,7 @@ END;-- --
 CREATE TRIGGER post_delete BEFORE DELETE ON posts FOR EACH ROW 
 BEGIN
 	DELETE FROM post_search WHERE docid = OLD.id;
+	DELETE FROM post_author_search WHERE docid = OLD.id;
 END;-- --
 
 CREATE TRIGGER topic_insert AFTER INSERT ON posts FOR EACH ROW 
@@ -527,6 +569,38 @@ BEGIN
 	REPLACE INTO post_search( docid, body ) 
 		VALUES ( NEW.id, NEW.bare );
 END;-- --
+
+-- Author info search insert
+CREATE TRIGGER author_name_email_insert AFTER INSERT ON posts FOR EACH ROW 
+WHEN NEW.author_name IS NOT NULL AND NEW.author_email IS NOT NULL
+BEGIN
+	INSERT INTO post_author_search( docid, body ) 
+		VALUES ( NEW.id, NEW.author_name || ' ' || NEW.author_email );
+END;-- --
+
+CREATE TRIGGER author_name_insert AFTER INSERT ON posts FOR EACH ROW 
+WHEN NEW.author_name IS NOT NULL AND NEW.author_email IS NULL
+BEGIN
+	INSERT INTO post_author_search( docid, body ) 
+		VALUES ( NEW.id, NEW.author_name );
+END;-- --
+
+
+-- Author update
+CREATE TRIGGER author_name_email_update AFTER UPDATE ON posts FOR EACH ROW 
+WHEN NEW.author_name IS NOT NULL AND NEW.author_email IS NOT NULL
+BEGIN
+	REPLACE INTO post_author_search( docid, body ) 
+		VALUES ( NEW.id, NEW.author_name || ' ' || NEW.author_email );
+END;-- --
+
+CREATE TRIGGER author_name_update AFTER UPDATE ON posts FOR EACH ROW 
+WHEN NEW.author_name IS NOT NULL AND NEW.author_email IS NULL
+BEGIN
+	REPLACE INTO post_author_search( docid, body ) 
+		VALUES ( NEW.id, NEW.author_name );
+END;-- --
+
 
 -- Topic deletion actions
 CREATE TRIGGER topic_delete BEFORE DELETE ON posts FOR EACH ROW
