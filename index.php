@@ -4435,6 +4435,31 @@ function getDataResult(
 }
 
 /**
+ *  Get or create cached PDO Statements
+ *  
+ *  @param PDO		$db	Database connection
+ *  @param string	$sql	Query string or statement
+ *  @return mixed
+ */
+function statement( ?\PDO $db, ?string $sql ) {
+	static $stmcache = [];
+	if ( empty( $db ) && empty( $sql ) ) {
+		\array_map( 
+			function( $v ) { return null; }, 
+			$stmcache 
+		);
+		return null;
+	}
+	
+	if ( isset( $stmcache[$sql] ) ) {
+		return $stmcache[$sql];
+	}
+	
+	$stmcache[$sql] = $db->prepare( $sql );
+	return $stmcache[$sql];
+}
+
+/**
  *  Shared data execution routine
  *  
  *  @param string	$sql	Database SQL
@@ -4453,7 +4478,7 @@ function dataExec(
 	$res	= null;
 	
 	try {
-		$stm	= $db->prepare( $sql );
+		$stm	= statement( $db, $sql );
 		$res	= getDataResult( $db, $params, $rtype, $stm );
 		
 	} catch( \PDOException $e ) {
@@ -4489,7 +4514,7 @@ function dataBatchExec (
 			return false;
 		}
 		
-		$stm	= $db->prepare( $sql );
+		$stm	= statement( $db, $sql );
 		foreach ( $params as $p ) {
 			$res[]	= getDataResult( $db, $params, $rtype, $stm );
 		}
@@ -4657,6 +4682,7 @@ function cleanup() {
 		\session_write_close();
 	}
 	
+	statement( null, null );
 	getDb( '', 'closeall' );
 	saveConfig();
 }
@@ -9870,7 +9896,7 @@ function addModeration( array $params ) {
 	)";
 	
 	$db	= getDb();
-	$stm	= $db->prepare( $sql );
+	$stm	= statement( $db, $sql );
 	
 	// Default response
 	$cresp	= config( 'filter_response', \FILTER_HOLD, 'int' );
@@ -10349,17 +10375,17 @@ function authByCredentials(
 function resetLookup( int $id ) : string {
 	$db	= getDb( \FORUM_DATA );
 	$stm	= 
-	$db->prepare( 
+	statement( $db, 
 		"UPDATE logout_view SET lookup = '' 
-				WHERE user_id = :id;" 
+		WHERE user_id = :id;" 
 	);
 	
 	if ( $stm->execute( [ ':id' => $id ] ) ) {
 		// SQLite should have generated a new random lookup
 		$rst = 
-		$db->prepare( 
+		satement( $db,  
 			"SELECT lookup FROM logins WHERE 
-				user_id = :id;"
+				user_id = :id;" 
 		);
 		
 		if ( $rst->execute( [ ':id' => $id ] ) ) {
@@ -10386,7 +10412,7 @@ function findCookie(
 	
 	$db	= getDb( \FORUM_DATA );
 	$stm	= 
-	$db->prepare( 
+	statement( $db, 
 		"SELECT * FROM login_view 
 			WHERE lookup = :lookup LIMIT 1;" 
 	);
