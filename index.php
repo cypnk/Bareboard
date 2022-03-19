@@ -4342,13 +4342,13 @@ function getDb( string $dsn, string $mode = 'get' ) {
 	
 	// First time? SQLite database will be created
 	$first_run	= !\file_exists( $dsn );
-	
+	$timeout	= config( 'data_timeout', \DATA_TIMEOUT, 'int' );
 	$opts	= [
-		\PDO::ATTR_TIMEOUT		=> 
-			config( 'data_timeout', \DATA_TIMEOUT, 'int' ),
+		\PDO::ATTR_TIMEOUT		=> $timeout,
 		\PDO::ATTR_DEFAULT_FETCH_MODE	=> \PDO::FETCH_ASSOC,
 		\PDO::ATTR_PERSISTENT		=> false,
 		\PDO::ATTR_EMULATE_PREPARES	=> false,
+		\PDO::ATTR_AUTOCOMMIT		=> false,
 		\PDO::ATTR_ERRMODE		=> 
 			\PDO::ERRMODE_EXCEPTION
 	];
@@ -4480,6 +4480,7 @@ function dataExec(
 	try {
 		$stm	= statement( $db, $sql );
 		$res	= getDataResult( $db, $params, $rtype, $stm );
+		$stm->closeCursor();
 		
 	} catch( \PDOException $e ) {
 		$stm	= null;
@@ -4487,7 +4488,6 @@ function dataExec(
 		return null;
 	}
 	
-	$stm	= null;
 	return $res;
 }
 
@@ -4518,6 +4518,7 @@ function dataBatchExec (
 		foreach ( $params as $p ) {
 			$res[]	= getDataResult( $db, $params, $rtype, $stm );
 		}
+		$stm->closeCursor();
 		$db->commit();
 		
 	} catch( \PDOException $e ) {
@@ -8391,6 +8392,11 @@ function request( string $event, array $hook, array $params ) : array {
 	// Check throttling
 	sessionThrottle();
 	
+	// Check for closed connection
+	if ( \connection_aborted() ) {
+		visitorAbort();
+	}
+	
 	$host	= getHost();
 	
 	// Empty host?
@@ -9915,6 +9921,7 @@ function addModeration( array $params ) {
 			empty( $term[3] ) ? null : textToDate( $term[3] )
 		] );
 	}
+	$stm->closeCursor();
 }
 
 /**
@@ -10381,6 +10388,8 @@ function resetLookup( int $id ) : string {
 	);
 	
 	if ( $stm->execute( [ ':id' => $id ] ) ) {
+		$stm->closeCursor();
+		
 		// SQLite should have generated a new random lookup
 		$rst = 
 		satement( $db,  
@@ -10389,10 +10398,12 @@ function resetLookup( int $id ) : string {
 		);
 		
 		if ( $rst->execute( [ ':id' => $id ] ) ) {
-			return $stm->fetchColumn();
+			$col = $rst->fetchColumn();
+			$rst->closeCursor();
+			return $col;
 		}
 	}
-	
+	$stm->closeCursor();
 	return '';
 }
 
@@ -10420,6 +10431,7 @@ function findCookie(
 	// First find lookup
 	if ( $stm->execute( [ ':lookup' => $lookup ] ) ) {
 		$results = $stm->fetchAll();
+		$stm->closeCursor();
 	}
 	
 	// No logins found
