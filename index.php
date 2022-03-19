@@ -8392,11 +8392,6 @@ function request( string $event, array $hook, array $params ) : array {
 	// Check throttling
 	sessionThrottle();
 	
-	// Check for closed connection
-	if ( \connection_aborted() ) {
-		visitorAbort();
-	}
-	
 	$host	= getHost();
 	
 	// Empty host?
