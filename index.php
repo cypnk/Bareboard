@@ -5519,15 +5519,19 @@ function normal( string $text ) : string {
  *  Label name ( ASCII only )
  *  
  *  @param string	$text	Raw label entered into field
+ *  @param int		$int	Max label length
  *  @return string
  */
-function labelName( string $text ) : string {
+function labelName( 
+	string	$text, 
+	int	$len	= 50 
+) : string {
 	$text	= unifySpaces( $text, '_' );
 	
 	return 
 	smartTrim( \preg_replace( 
 		'/[^a-z0-9_\-\.]/i', '', normal( $text ) 
-	), 50 );
+	), $len );
 }
 
 /**
@@ -9896,7 +9900,7 @@ function addModeration( array $params ) {
 		:label, :hash, :content, :response, :reason, :expires 
 	)";
 	
-	$db	= getDb();
+	$db	= getDb( \FORUM_DATA );
 	$stm	= statement( $db, $sql );
 	
 	// Default response
@@ -10495,6 +10499,34 @@ function findUserByUsername( string $username ) : array {
 }
 
 /**
+ *  Check if username or it's clean equivalent exists
+ *  
+ *  @param string		$username	User's login name
+ *  @return bool
+ */
+function usernameExists( string	$username ) : bool {
+	$sql		= 
+	"SELECT COUNT( id ) FROM users WHERE 
+		username = :user OR user_clean = :clean;";
+	
+	$db		= getDb( \FORUM_DATA );
+	$stm		= statement( $db, $sql );
+	$result		= 
+	getDataResult( 
+		$db,
+		[ 
+			':user'		=> $username, 
+			':clean'	=> 
+			labelName( $username, strsize( $username ) )
+		], 
+		'column',
+		$stm
+	);
+	$stm->closeCursor();
+	return empty( $result ) ? false : true;
+}
+
+/**
  *  Reset authenticated user data types for processing
  *  
  *  @param array	$user		Stored user in database/session
@@ -11000,8 +11032,7 @@ function registerForm( int &$status ) : array {
 function processRegister( array $data, string $path ) {
 	sessionCheck();
 	
-	$existing	= findUserByUsername( $data['username'] );
-	if ( !empty( $existing ) ) {
+	if ( usernameExists( $data['username'] ) ) {
 		sendError( 
 			401, 
 			errorLang( 'nameexists', \MSG_USER_EXISTS ) 
