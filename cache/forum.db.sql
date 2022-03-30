@@ -77,6 +77,22 @@ SELECT
 	JOIN users ON logins.user_id = users.id
 	LEFT JOIN user_auth ua ON users.id = ua.user_id;-- --
 
+-- User statistics
+CREATE TABLE user_stats (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	user_id INTEGER NOT NULL,
+	post_count INTEGER NOT NULL DEFAULT 0,
+	last_post DATETIME DEFAULT NULL
+	
+	CONSTRAINT fk_post_user 
+		FOREIGN KEY ( user_id ) 
+		REFERENCES users ( id ) 
+		ON DELETE CASCADE
+);-- --
+CREATE INDEX idx_user_stats ON user_stats ( user_id );-- --
+CREATE INDEX idx_user_last_post ON user_stats ( last_post )
+	WHERE last_post IS NOT NULL;-- --
+
 
 -- Login regenerate. Not intended for SELECT
 -- Usage:
@@ -102,6 +118,9 @@ BEGIN
 	-- New login lookup
 	INSERT INTO logins( user_id, lookup )
 		VALUES( NEW.id, ( SELECT id FROM rnd ) );
+	
+	-- Create stats	
+	INSERT INTO user_stats( user_id ) VALUES( NEW.id );
 END;-- --
 
 -- Update last modified
@@ -520,6 +539,26 @@ BEGIN
 	DELETE FROM post_author_search WHERE docid = OLD.id;
 END;-- --
 
+CREATE TRIGGER post_userstat_insert AFTER INSERT ON posts FOR EACH ROW
+WHEN NEW.user_id IS NOT NULL
+	UPDATE user_stats SET post_count = ( post_count + 1 ) 
+		last_post = CURRENT_TIMESTAMP 
+		WHERE user_id = NEW.user_id;
+END;-- --
+
+CREATE TRIGGER post_userstat_delete BEFORE DELETE ON posts FOR EACH ROW
+WHEN OLD.user_id IS NOT NULL
+BEGIN
+	UPDATE user_stats SET post_count = ( post_count - 1 ), 
+		last_post = (
+			SELECT posts.created FROM posts 
+				WHERE user_id = OLD.user_id 
+				ORDER BY posts.created DESC 
+				LIMIT 1
+		) 
+		WHERE user_id = OLD.user_id;
+END;-- --
+
 CREATE TRIGGER topic_insert AFTER INSERT ON posts FOR EACH ROW 
 WHEN NEW.parent_id IS NULL AND NEW.forum_id IS NOT NULL
 BEGIN
@@ -868,6 +907,9 @@ CREATE VIEW thread_view AS SELECT
 	users.settings AS user_settings,
 	users.status AS user_status,
 	
+	us.post_count AS user_post_count,
+	us.last_post AS user_last_post,
+	
 	posts.author_email AS author_email,
 	posts.author_ip AS author_ip,
 	ua.last_ip AS user_ip,
@@ -876,6 +918,7 @@ CREATE VIEW thread_view AS SELECT
 	FROM posts
 	LEFT JOIN users ON posts.user_id = users.id 
 	LEFT JOIN user_auth ua ON users.id = ua.user_id
+	LEFT JOIN user_stats us ON users.id = us.user_id
 	LEFT JOIN post_stats stats ON posts.id = stats.post_id;-- --
 
 CREATE VIEW thread_sibling_view AS SELECT DISTINCT
