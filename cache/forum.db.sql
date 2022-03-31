@@ -84,7 +84,7 @@ CREATE TABLE user_stats (
 	post_count INTEGER NOT NULL DEFAULT 0,
 	last_post DATETIME DEFAULT NULL
 	
-	CONSTRAINT fk_post_user 
+	CONSTRAINT fk_post_stat_user 
 		FOREIGN KEY ( user_id ) 
 		REFERENCES users ( id ) 
 		ON DELETE CASCADE
