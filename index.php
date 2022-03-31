@@ -4511,7 +4511,7 @@ function dataBatchExec (
 	
 	try {
 		if ( !$db->beginTransaction() ) {
-			return false;
+			return [];
 		}
 		
 		$stm	= statement( $db, $sql );
@@ -11338,47 +11338,6 @@ function loadTemplates( string $event, array $hook, array $params ) {
 
 
 /**
- *  New topic form
- *  
- *  @param int		$forum_id	Forum unique identifier
- *  @param int		$status		HTML Form validation status
- *  @return array
- */
-function topicForm( int $forum_id, int &$status ) : array {
-	$status	= 
-	validateForm( 'topic', false, true, [ 'forum=' . $forum_id ] );
-	
-	if ( $status != \FORM_STATUS_VALID ) { 
-		return [];
-	}
-	
-	$filter = [
-		'forum'	=> [
-			'filter'	=> \FILTER_VALIDATE_INT,
-			'options'	=> [
-				'default'	=> 0,
-				'min_range'	=> 1
-			]
-		],
-		// Post body
-		'message'	=> [
-			'filter'	=> \FILTER_CALLBACK,
-			'options'	=> 'title'
-		],
-		'author'		=> [
-			'filter'	=> \FILTER_CALLBACK,
-			'options'	=> 'tripcode'
-		],
-		'email'		=> [
-			'filter'	=> \FILTER_CALLBACK,
-			'options'	=> 'cleanEmail'
-		]
-	];
-	
-	return \filter_input_array( \INPUT_POST, $filter );
-}
-
-/**
  *  Add or edit forum
  *  
  *  @param int		$id		Current forum id or empty if new
@@ -11589,6 +11548,107 @@ function editForum(
 		], 
 		\FORUM_DATA 
 	);
+}
+
+/**
+ *  Sort single forum
+ *  
+ *  @param int		$id	Forum unique identifier
+ *  @param int		$sort	Sorting index
+ *  @return bool
+ */
+function sortForum( int $id, int $sort ) : bool {
+	static $sql	= 
+	"UPDATE forums SET sort = :sort WHERE id = :id;";
+	
+	return 
+	setUpdate( 
+		$sql, 
+		[ 
+			':sort'	=> 
+			intRange( 
+				$p['sort'] ?? $p[':sort'] ?? 0, 0, 9999 
+			),
+			':id'	=> $id
+		], 
+		\FORUM_DATA 
+	);
+}
+
+/**
+ *  Arrange list of forums by given order in 
+ *  [ :sort => position, :id => id ] format
+ *  
+ *  @param array	$params	Forum sort order list
+ *  @return array	
+ */
+function sortForums( array $params ) : array {
+	static $sql	= 
+	"UPDATE forums SET sort = :sort WHERE id = :id;";
+	
+	$up = [];
+	$id = 0;
+	foreach ( $params as $p ) {
+		if ( !\is_array( $p ) ) {
+			continue;
+		}
+		
+		// Prepare parameters
+		$id	= $p['id'] ?? $p[':id'] ?? 0;
+		if ( empty( $id ) ) {
+			continue;
+		}
+		$up[]	= [
+			':sort' => 
+			intRange( 
+				$p['sort'] ?? $p[':sort'] ?? 0, 0, 9999 
+			),
+			':id'	=> $id
+		];
+	}
+	
+	return dataBatchExec( $sql, $up, 'update', \FORUM_DATA );
+}
+
+/**
+ *  New topic form
+ *  
+ *  @param int		$forum_id	Forum unique identifier
+ *  @param int		$status		HTML Form validation status
+ *  @return array
+ */
+function topicForm( int $forum_id, int &$status ) : array {
+	$status	= 
+	validateForm( 'topic', false, true, [ 'forum=' . $forum_id ] );
+	
+	if ( $status != \FORM_STATUS_VALID ) { 
+		return [];
+	}
+	
+	$filter = [
+		'forum'	=> [
+			'filter'	=> \FILTER_VALIDATE_INT,
+			'options'	=> [
+				'default'	=> 0,
+				'min_range'	=> 1
+			]
+		],
+		// Post body
+		'message'	=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'title'
+		],
+		'author'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'tripcode'
+		],
+		'email'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'cleanEmail'
+		]
+	];
+	
+	return \filter_input_array( \INPUT_POST, $filter );
 }
 
 /**
