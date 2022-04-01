@@ -376,6 +376,7 @@ CREATE TABLE posts(
 	parent_id INTEGER DEFAULT NULL,
 	title TEXT DEFAULT NULL COLLATE NOCASE,
 	user_id INTEGER DEFAULT NULL,
+	preview TEXT DEFAULT NULL COLLATE NOCASE,
 	body TEXT NOT NULL COLLATE NOCASE,
 	bare TEXT NOT NULL COLLATE NOCASE,
 	
@@ -562,6 +563,8 @@ END;-- --
 CREATE TRIGGER topic_insert AFTER INSERT ON posts FOR EACH ROW 
 WHEN NEW.parent_id IS NULL AND NEW.forum_id IS NOT NULL
 BEGIN
+	UPDATE posts SET preview = title WHERE id = NEW.id;
+	
 	INSERT INTO post_search( docid, body ) 
 		VALUES ( NEW.id, NEW.title || ' ' || NEW.bare );
 	
@@ -607,6 +610,21 @@ WHEN NEW.parent_id IS NOT NULL AND NEW.forum_id IS NULL
 BEGIN
 	REPLACE INTO post_search( docid, body ) 
 		VALUES ( NEW.id, NEW.bare );
+END;-- --
+
+-- Text previews
+CREATE TRIGGER post_preview_insert AFTER INSERT ON POSTS FOR EACH ROW
+WHEN length( NEW.bare ) > 80 
+BEGIN
+	UPDATE posts SET preview = substr( NEW.bare, 1, 80 )
+		WHERE id = NEW.id;
+END;-- --
+
+CREATE TRIGGER post_preview_update AFTER UPDATE ON POSTS FOR EACH ROW
+WHEN length( NEW.bare ) > 80 
+BEGIN
+	UPDATE posts SET preview = substr( NEW.bare, 1, 80 )
+		WHERE id = NEW.id;
 END;-- --
 
 -- Author info search insert
