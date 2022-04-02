@@ -348,6 +348,9 @@ define( 'TRIP_ALGO',		'tiger192,4' );
 // Tripcode size
 define( 'TRIP_SIZE',		10 );
 
+// Maximum past chat messages to retrieve on page load
+define( 'MAX_CHAT',	20 );
+
 
 /**
  *  Templates and customization
@@ -492,6 +495,13 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"post_idx_heading_wrap_classes"	: "content",
 	"post_idx_body_wrap_classes"	: "content",
 	"post_idx_pub_classes"		: "",
+	
+	"chat_idx_wrap_classes"		: "",
+	"chat_index_item_classes"	: "",
+	"chat_datetime_classes"		: "",
+	"chat_author_classes"		: "",
+	"chat_author_a_classes"		: "",
+	"chat_body_wrap_classes"	: "",
 	
 	"footer_classes"		: "",
 	"footer_wrap_classes"		: "content", 
@@ -762,7 +772,7 @@ define( 'SESSION_BYTES',	12 );
  *  Session throttling limits
  */
 // Number of rapid requests before throttling begins
-define( 'SESSION_LIMIT_COUNT', 5 );
+define( 'SESSION_LIMIT_COUNT', 15 );
 
 // Seconds between requests before "medium" throttling
 define( 'SESSION_LIMIT_MEDIUM', 3 );
@@ -1361,7 +1371,7 @@ HTML;
 
 // Anon post reply form
 $templates['tpl_anonreply_form'] = <<<HTML
-<form action="{action}" method="post" class="{form_classes}" id="anon_post_form">
+<form action="{action}" method="post" class="{form_classes}" id="anon_comment_form">
 	<input type="hidden" name="topic" value="{topic}">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
@@ -1383,7 +1393,7 @@ HTML;
 
 // User post reply form
 $templates['tpl_userreply_form'] = <<<HTML
-<form action="{action}" method="post" class="{form_classes}" id="comment_form">
+<form action="{action}" method="post" class="{form_classes}" id="user_comment_form">
 	<input type="hidden" name="topic" value="{topic}">
 	<input type="hidden" name="token" value="{token}">
 	<input type="hidden" name="nonce" value="{nonce}">
@@ -1435,6 +1445,68 @@ $templates['tpl_anoneditpost_form'] = <<<HTML
 </form>
 HTML;
 
+/**
+ *  Chat templates
+ */
+// Anonymous user chat
+$templates['tpl_anonchat_item']		= <<<HTML
+<li class="{chat_index_item_classes}"><time 
+	class="{chat_datetime_classes}" datetime="{date_utc}">{date_stamp}</time>
+	<span class="{chat_author_classes}">{author_name} <sup>{author_key}</sup></span>
+	<span class="{chat_body_wrap_classes}">{body}</span></li>
+HTML;
+
+// Registered user chat
+$templates['tpl_userchat_item']		= <<<HTML
+<li class="{chat_index_item_classes}"><time 
+	class="{chat_datetime_classes}" datetime="{date_utc}">{date_stamp}</time>
+	<span class="{chat_author_classes}"><a href=\"{userlink}\" 
+		class="{chat_author_a_classes}" 
+		title="{username}">{user_display}<\/a></span>
+	<span class="{chat_body_wrap_classes}">{body}</span></li>
+HTML;
+
+// Forum main listing wrapper
+$templates['tpl_chat_index']	= <<<HTML
+<ul class="{chat_idx_wrap_classes}>{chats}</ul>
+HTML;
+
+// Anon post reply form
+$templates['tpl_anonchat_form'] = <<<HTML
+<form action="{action}" method="post" class="{form_classes}" id="anon_chat_form">
+	<input type="hidden" name="token" value="{token}">
+	<input type="hidden" name="nonce" value="{nonce}">
+	<input type="hidden" name="meta" value="{meta}">
+	<p class="{field_wrap_classes}">
+		{chat_message_label_before}<label for="message" class="{label_classes}">{lang:forms:anonchat:msg}</label>{chat_message_label_after}
+		{chat_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{chat_message_input_after}
+		{chat_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:anonchat:msgdesc}</small>{chat_message_desc_after}
+	</p>
+	<p class="{field_wrap_classes}">
+		{chat_name_label_before}<label for="postname" class="{label_classes}">{lang:forms:anonchat:name}</label>{chat_name_label_after}
+		{chat_name_input_before}<input id="postauthor" type="text" class="{input_classes}" aria-describedby="postauthor-desc" name="author" maxlength="{name_max}" pattern="([^\s][\w\s]{{name_min},{name_max}})">{chat_name_input_after}
+		{chat_name_desc_before}<small id="postauthor-desc" class="{desc_classes}">{lang:forms:anonchat:namedesc}</small>{chat_name_desc_after}
+	</p>
+	<p class="{field_wrap_classes}"><label class="{check_label_classes}"><input type="checkbox" name="terms" value="1" required> Agree to the <a href="{terms}" target="_blank">site terms</a></label> 
+		<input type="submit" class="{submit_classes}" value="{lang:forms:anonpost:submit}"></p>
+</form>
+HTML;
+
+// User post reply form
+$templates['tpl_userchat_form'] = <<<HTML
+<form action="{action}" method="post" class="{form_classes}" id="user_chat_form">
+	<input type="hidden" name="token" value="{token}">
+	<input type="hidden" name="nonce" value="{nonce}">
+	<input type="hidden" name="meta" value="{meta}">
+	<p class="{field_wrap_classes}">{lang:forms:userpost:name}</p>
+	<p class="{field_wrap_classes}">
+		{chat_message_label_before}<label for="message" class="{label_classes}">{lang:forms:userchat:msg}</label>{chat_message_label_after}
+		{chat_message_input_before}<textarea id="message" name="message" rows="3" cols="60" class="{input_classes}" aria-describedby="message-desc" required>{message}</textarea>{chat_message_input_after}
+		{chat_message_desc_before}<small id="message-desc" class="{desc_classes}">{lang:forms:userchat:msgdesc}</small>{chat_message_desc_after}
+	</p>
+	<p><input type="submit" class="{submit_classes}" value="{lang:forms:userpost:submit}"></p>
+</form>
+HTML;
 
 /**
  *  Moderation and management component templates
@@ -12241,7 +12313,9 @@ function postUserEditAuth( int $id, int $uid ) : bool {
  *  @return array
  */
 function chatForm( int &$status ) : array {
-	$status	= validateForm( 'chat', false, true );
+	$user	= authUser();
+	$id	= $user['id'] ?? 0;
+	$status	= validateForm( 'chat', false, true, [ 'id=' . $id ] );
 	
 	if ( $status != \FORM_STATUS_VALID ) { 
 		return [];
@@ -12306,6 +12380,157 @@ function newChat(
 			':status'	=> $status
 		], 
 		\FORUM_DATA 
+	);
+}
+
+/**
+ *  Live updating chat list
+ *  
+ *  @param int		$since		Last timestamp to get chats
+ *  @return string
+ */
+function getChatList( int $since ) : string {
+	static $sql = 
+	"SELECT * FROM chat_view 
+		WHERE chat_since <= :since 
+		ORDER BY chat_created ASC 
+		LIMIT :limit";
+	
+	$climit	= config( 'max_chat', \MAX_CHAT, 'int' );
+	$chats	= 
+	getResults(
+		$sql, 
+		[ 
+			':since'	=> $since,
+			':limit'	=> $climit
+		], 
+		\FORUM_DATA 
+	);
+	
+	// No chats yet? Send empty list
+	if ( empty( $chats ) ) {
+		return
+		hookWrap( 
+			'beforechatlist',
+			'afterchatlist',
+			template( 'tpl_chat_index' ),
+			[ 'chats' => '' ]
+		);
+	}
+	
+	$formatted	= [];
+	$ctpl		= '';
+	$ulnk		= '';
+	$upfx		= 
+	slashPath( pageRoutePath( 'showuser', 'user' ), true );
+	
+	foreach( $chats as $c ) {
+		if ( empty( $c['user_id'] ) ) {
+			$ctpl = 'tpl_anonchat_item';
+			$ulnk = '';
+		} else {
+			$ctpl = 'tpl_userchat_item';
+			$ulnk = $upfx . $c['user_id'];
+		}
+		
+		$formatted[]	= 
+		hookWrap( 
+			'beforechatitem', 
+			'afterchatitem', 
+			template( $ctpl ),
+			[
+				'date_utc'	=> $c['chat_created'],
+				'date_stamp'	=> 
+				hookStringResult( 
+					'formatchatdate', 
+					dateNice( $c['chat_created'] )
+				),
+				'body'		=> 
+				hookStringResult( 
+					'formatchatbody', 
+					$c['body'] 
+				),
+				'userlink'	=> $ulnk,
+				'username'	=> $c['username'] ?? '',
+				'user_display'	=> $c['user_display'] ?? '',
+				'author_name'	=> $c['author_name'] ?? '',
+				'author_key'	=> $c['author_key'] ?? ''
+			] 
+		);
+	}
+	
+	return
+	hookWrap( 
+		'beforechatlist',
+		'afterchatlist',
+		template( 'tpl_chat_index' ), 
+		[ 'chats' => implode( '', $formatted ) ]
+	);
+}
+
+/**
+ *  Generate embedded chat form
+ *  This may be used with onclick or similar event to avoid form expiry
+ *  
+ *  @return string
+ */
+function createChatForm() : string {
+	$user	= authUser();
+	$id	= $user['id'] ?? 0;
+	
+	// Register form XSRF
+	$pair	= genNoncePair( 'chat', [ 'id=' . $id ] );
+	
+	// User-specific templates
+	if ( empty( $user ) ) {
+		$tpl	= 'tpl_anonchat_form';
+		$ulnk	= '';
+	} else { 
+		$tpl	= 'tpl_userchat_form';
+		$ulnk	= 
+		slashPath( 
+			pageRoutePath( 'showuser', 'user' ), true 
+		) . $user['id'];
+	}
+	
+	return
+	hookWrap( 
+		'beforechatform',
+		'afterchatform',
+		template( $tpl ), 
+		[ 
+			// Metadata
+			'nonce'		=> $pair['nonce'], 
+			'token'		=> $pair['token'],
+			'meta'		=> $pair['meta'],
+			'action'	=> 
+			eventRoutePrefix( 'dochat', 'chat' ),
+			
+			// Placeholders
+			'chat_message_label_before'	=> '',
+			'chat_message_label_after'	=> '',
+			'chat_message_input_before'	=> '',
+			'chat_message_input_after'	=> '',
+			'chat_message_desc_before'	=> '',
+			'chat_message_desc_after'	=> '',
+			
+			// If this is anonymous
+			'chat_name_label_before'	=> '',
+			'chat_name_label_after'		=> '',
+			'chat_name_input_before'	=> '',
+			'chat_name_input_after'		=> '',
+			'chat_name_desc_before'		=> '',
+			'chat_name_desc_after'		=> '',
+			
+			'name_min'	=> 
+			config( 'name_min', \NAME_MIN, 'int' ),
+			
+			'name_max'	=> 
+			config( 'name_max', \NAME_MAX, 'int' ),
+			
+			'userlink'	=> $ulnk,
+			'username'	=> $user['name'] ?? '';
+		]
 	);
 }
 
@@ -12430,6 +12655,14 @@ function checkConfig( string $event, array $hook, array $params ) {
 				'min_range'	=> 1,
 				'max_range'	=> 5000,
 				'default'	=> \MAX_PAGE
+			]
+		],
+		'max_chat' => [
+			'filter'	=> \FILTER_VALIDATE_INT,
+			'options'	=> [
+				'min_range'	=> 1,
+				'max_range'	=> 100,
+				'default'	=> \MAX_CHAT
 			]
 		],
 		'max_url_size' => [
@@ -12875,7 +13108,7 @@ function excludeThrottling() {
 	
 	throttleDisabled( [ 
 		'/pages', '/feed', '/post', '/forum', '/topic', 
-		'/search', '/\\?nonce=' 
+		'/chat', '/search', '/\\?nonce=' 
 	] );
 }
 
