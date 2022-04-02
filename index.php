@@ -11794,6 +11794,7 @@ function newPostPage(
  *  @param string	$email	Anonymous author email (optional)
  *  @param int		$pinned	Set pin status (optional)
  *  @param int		$sort	Set sorting order when pinned (optional)
+ *  @param int		$status	Topic visibility/behavior status
  *  @return int
  */
 function newTopic( 
@@ -12231,6 +12232,81 @@ function postUserEditAuth( int $id, int $uid ) : bool {
 	// Is author
 	return 
 	( ( int ) $res['user_id'] == $uid ) ? true : false;
+}
+
+/**
+ *  New chat form
+ *  
+ *  @param int		$status		Form validation status
+ *  @return array
+ */
+function chatForm( int &$status ) : array {
+	$status	= validateForm( 'chat', false, true );
+	
+	if ( $status != \FORM_STATUS_VALID ) { 
+		return [];
+	}
+	
+	$filter = [
+		// Chat body
+		'message'	=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'title'
+		],
+		'author'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'tripcode'
+		],
+		'email'		=> [
+			'filter'	=> \FILTER_CALLBACK,
+			'options'	=> 'cleanEmail'
+		]
+	];
+	
+	return \filter_input_array( \INPUT_POST, $filter );
+}
+
+/**
+ *  Create new chat message
+ *  
+ *  @param string	$body	Chat content
+ *  @param string	$name	Anonymous author name (optional)
+ *  @param string	$email	Anonymous author email (optional)
+ *  @param int		$status	Chat behavior status
+ */
+function newChat( 
+	string	$body, 
+	?string	$name, 
+	?string	$email, 
+	?int	$status 
+) {
+	static $sql	= 
+	"INSERT INTO chats( :user_id, body, author_name, 
+		author_key, author_email, author_ip, status ) 
+	VALUES( :user_id, :body, :author_name, 
+		:author_key, :author_email, :author_ip, :status );";
+	
+	$user	= authUser();
+	$author = 
+	empty( $user ) ? 
+		tripcode( $name ?? '' ) : [];
+	
+	$status	??= 0;
+	
+	return 
+	setInsert( 
+		$sql, 
+		[
+			':user_id'	=> $user['id'] ?? null, 
+			':body'		=> html( $body ), 
+			':author_name'	=> $author['name'] ?? null, 
+			':author_key'	=> $author['key'] ?? null, 
+			':author_email'	=> cleanEmail( $email ?? '' ), 
+			':author_ip'	=> getIP(), 
+			':status'	=> $status
+		], 
+		\FORUM_DATA 
+	);
 }
 
 /**
