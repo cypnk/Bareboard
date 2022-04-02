@@ -93,6 +93,19 @@
 			"name"		: "Name <span>(Name#secret format required to edit)<\/span>",
 			"namedesc"	: "Between {name_min} and {name_max} characters. Letters, numbers, and spaces supported.",
 			"submit"	: "Save changes"
+		},
+		"anonchat"	: {
+			"name"		: "Name <span>(optional)<\/span>",
+			"namedesc"	: "Between {name_min} and {name_max} characters. Letters, numbers, and spaces supported. Name#secret format supported.",
+			"msg"		: "Message <span>(required)<\/span>",
+			"msgdesc"	: "Plain text only",
+			"submit"	: "Post"
+		},
+		"userchat"	: {
+			"name"		: "Posting as <a href=\"{userlink}\">{username}<\/a>",
+			"msg"		: "Message <span>(required)<\/span>",
+			"msgdesc"	: "Plain text only",
+			"submit"	: "Post"
 		}
 	},
 	"nav"		: {
