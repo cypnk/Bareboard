@@ -2110,14 +2110,6 @@ function template( string $label, array $reg = [] ) : string {
 }
 
 /**
- *  Check if script is running with the latest supported PHP version
- *  This function remains for backward compatibility
- */ 
-function newPHP( string $spec = '8.0' ) : bool {
-	return libVersion( $spec );
-}
-
-/**
  *  Check if a specific library or if PHP is the given version or above
  *  
  *  @param string	$spec		Minimum supported version
@@ -4744,6 +4736,56 @@ function getSingle(
 	}
 	return \is_array( $data[0] ) ? 
 		formatSettings( $data[0] ) : $data[0];
+}
+
+/**
+ *  Helper to set a single int parameter by id in a list of pairs in 
+ *  [ ':parameter' => value range, ':id' => id ] format
+ *  
+ *  @param array	$params		ID and parameter pairs
+ *  @param string	$val		Bare 'parameter' label
+ *  @param int		$default	Value in lieu of parameter
+ *  @param int		$min		Minimum integer range for value
+ *  @param int		$max		Maximum integer range for value
+ *  @return array
+ */
+function batchIntParams(
+	array	$params, 
+	string	$val, 
+	int	$default, 
+	int	$min,
+	int	$max
+) {
+	$up	= [];
+	$id	= 0;
+	
+	// Bound parameter format
+	$val	= \ltrim( $val, ':' );
+	$pval	= ':' . $val;
+	
+	foreach ( $params as $p ) {
+		if ( !\is_array( $p ) ) {
+			continue;
+		}
+		
+		// Prepare parameters
+		$id	= $p[':id'] ?? $p['id'] ?? 0;
+		if ( empty( $id ) ) {
+			continue;
+		}
+		$up[]	= 
+		[
+			$pval	=> 
+			intRange( 
+				$p[$pval] ?? $p[$val] ?? $default, 
+				$min, 
+				$max 
+			),
+			':id'	=> $id
+		];
+	}
+	
+	return $up;
 }
 
 /**
@@ -11623,33 +11665,8 @@ function editForum(
 }
 
 /**
- *  Sort single forum
- *  
- *  @param int		$id	Forum unique identifier
- *  @param int		$sort	Sorting index
- *  @return bool
- */
-function sortForum( int $id, int $sort ) : bool {
-	static $sql	= 
-	"UPDATE forums SET sort = :sort WHERE id = :id;";
-	
-	return 
-	setUpdate( 
-		$sql, 
-		[ 
-			':sort'	=> 
-			intRange( 
-				$p['sort'] ?? $p[':sort'] ?? 0, 0, 9999 
-			),
-			':id'	=> $id
-		], 
-		\FORUM_DATA 
-	);
-}
-
-/**
  *  Arrange list of forums by given order in 
- *  [ :sort => position, :id => id ] format
+ *  [ :sort => 0 to 9999, :id => id ] format
  *  
  *  @param array	$params	Forum sort order list
  *  @return array	
@@ -11658,28 +11675,13 @@ function sortForums( array $params ) : array {
 	static $sql	= 
 	"UPDATE forums SET sort = :sort WHERE id = :id;";
 	
-	$up = [];
-	$id = 0;
-	foreach ( $params as $p ) {
-		if ( !\is_array( $p ) ) {
-			continue;
-		}
-		
-		// Prepare parameters
-		$id	= $p['id'] ?? $p[':id'] ?? 0;
-		if ( empty( $id ) ) {
-			continue;
-		}
-		$up[]	= [
-			':sort' => 
-			intRange( 
-				$p['sort'] ?? $p[':sort'] ?? 0, 0, 9999 
-			),
-			':id'	=> $id
-		];
-	}
-	
-	return dataBatchExec( $sql, $up, 'update', \FORUM_DATA );
+	return 
+	dataBatchExec( 
+		$sql, 
+		batchIntParams( $params, 'sort', 0, 0, 9999 ), 
+		'update', 
+		\FORUM_DATA 
+	);
 }
 
 /**
@@ -12067,57 +12069,60 @@ function editReply(
 }
 
 /**
- *  Change pin status on or off on a topic
+ *  Change pin status on or off on a topic 
+ *  [ :pin => 0 to 1, :id => id ] format
  *  
- *  @param int		$id	Topic unique identifier
- *  @param bool		$pin	Pin the topic if true 
+ *  @param array	$params		List of ids
  */
-function postPin( int $id, bool $pin = true ) : bool {
+function pinPosts( array $params ) : array {
 	static $sql	= 
 	"UPDATE posts SET is_pinned = :pin WHERE id = :id";
 	
 	return 
-	setUpdate( 
-		$sql,
-		[ ':pin' => $pin ? 1 : 0, ':id' => $id ]
-		\FORUM_DATA
-	);
-}
-
-/**
- *  Change post status
- *  
- *  @param int		$id	Post unique identifier
- *  @param int		$status	New post status
- *  @return bool
- */
-function postStatus( int $id, int $status ) : bool {
-	static $sql = 
-	"UPDATE posts SET status = :status WHERE id = :id";
-	
-	return 
-	setUpdate( 
+	dataBatchExec( 
 		$sql, 
-		[ ':status' => $status, ':id' => $id ], 
+		batchIntParams( $params, 'pin', 0, 0, 1 ), 
+		'update', 
 		\FORUM_DATA 
 	);
 }
 
 /**
- *  Change post sorting order
+ *  Change post status from an array in 
+ *  [ :status => -99 to 99, :id => id ] format
  *  
- *  @param int		$id	Post unique identifier
- *  @param int		$sort	New sort order index
- *  @return bool
+ *  @param array	$params	List of statuses and posts
+ *  @return array
  */
-function postSort( int $id, int $sort ) : bool {
+function statusPosts( array $params ) : array {
+	static $sql	= 
+	"UPDATE posts SET status = :status WHERE id = :id";
+	
+	return 
+	dataBatchExec( 
+		$sql, 
+		batchIntParams( $params, 'status', 0, -99, 99 ), 
+		'update', 
+		\FORUM_DATA 
+	);
+}
+
+/**
+ *  Sort list of posts from an array in 
+ *  [ :sort => position, :id => id ] format
+ *  
+ *  @param array	$params	List of sort positions posts
+ *  @return array
+ */
+function sortPosts( array $params ) : array {
 	static $sql = 
 	"UPDATE posts SET sort_order = :sort WHERE id = :id";
 	
 	return 
-	setUpdate( 
+	dataBatchExec( 
 		$sql, 
-		[ ':sort' => $status, ':id' => $id ], 
+		batchIntParams( $params, 'sort', 0, 0, 9999 ), 
+		'update', 
 		\FORUM_DATA 
 	);
 }
@@ -13451,7 +13456,7 @@ function doEditProfileRoute( string $event, array $hook, array $params ) {
 			':id'		=> $id 
 		], 
 		\FORUM_DATA
-	)
+	);
 	
 	if ( !$ok ) {
 		sendExpired();
