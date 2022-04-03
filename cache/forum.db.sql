@@ -82,7 +82,7 @@ CREATE TABLE user_stats (
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 	user_id INTEGER NOT NULL,
 	post_count INTEGER NOT NULL DEFAULT 0,
-	last_post DATETIME DEFAULT NULL
+	last_post DATETIME DEFAULT NULL,
 	
 	CONSTRAINT fk_post_stat_user 
 		FOREIGN KEY ( user_id ) 
@@ -542,7 +542,8 @@ END;-- --
 
 CREATE TRIGGER post_userstat_insert AFTER INSERT ON posts FOR EACH ROW
 WHEN NEW.user_id IS NOT NULL
-	UPDATE user_stats SET post_count = ( post_count + 1 ) 
+BEGIN
+	UPDATE user_stats SET post_count = ( post_count + 1 ), 
 		last_post = CURRENT_TIMESTAMP 
 		WHERE user_id = NEW.user_id;
 END;-- --
@@ -563,8 +564,6 @@ END;-- --
 CREATE TRIGGER topic_insert AFTER INSERT ON posts FOR EACH ROW 
 WHEN NEW.parent_id IS NULL AND NEW.forum_id IS NOT NULL
 BEGIN
-	UPDATE posts SET preview = title WHERE id = NEW.id;
-	
 	INSERT INTO post_search( docid, body ) 
 		VALUES ( NEW.id, NEW.title || ' ' || NEW.bare );
 	
@@ -613,15 +612,15 @@ BEGIN
 END;-- --
 
 -- Text previews
-CREATE TRIGGER post_preview_insert AFTER INSERT ON POSTS FOR EACH ROW
-WHEN length( NEW.bare ) > 80 
+CREATE TRIGGER post_preview_insert AFTER INSERT ON posts FOR EACH ROW
+WHEN length( NEW.bare ) > 80 AND NEW.preview IS NULL
 BEGIN
 	UPDATE posts SET preview = substr( NEW.bare, 1, 80 )
 		WHERE id = NEW.id;
 END;-- --
 
-CREATE TRIGGER post_preview_update AFTER UPDATE ON POSTS FOR EACH ROW
-WHEN length( NEW.bare ) > 80 
+CREATE TRIGGER post_preview_update AFTER UPDATE ON posts FOR EACH ROW
+WHEN length( NEW.bare ) > 80 AND NEW.preview IS NULL
 BEGIN
 	UPDATE posts SET preview = substr( NEW.bare, 1, 80 )
 		WHERE id = NEW.id;
