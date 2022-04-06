@@ -1908,7 +1908,7 @@ HTML;
 
 // Meta, script, and stylesheet tag templates
 define( 'TPL_META_TAG',	'<meta name="{name}" content="{content}">' );
-define( 'TPL_SCRIPT_TAG', '<script src="{url}"></script>' );
+define( 'TPL_SCRIPT_TAG', '<script src="{url}" nonce="{nonce}"></script>' );
 define( 'TPL_STYLE_TAG', '<link rel="stylesheet" href="{url}">' );
 
 /**
@@ -3818,34 +3818,51 @@ function rsettings( string $area, array $modify = [] ) : array {
 				break;
 				
 			case 'styles':
-				$s = config( 'default_stylesheets', \DEFAULT_STYLESHEETS );
-				$store['styles']	= \is_array( $s ) ? $s : 
+				$s	= config( 'default_stylesheets', \DEFAULT_STYLESHEETS );
+				$s	= \is_array( $s ) ? $s : 
 				linePresets( 
 					'stylesheets', 
 					'style_limit', 
 					\STYLE_LIMIT, 
 					$s
 				);
+				
+				// Merge plugin stylesheets
+				hook( [ 'stylesloaded', [ 'styles' => $s ] ] );
+				$store['styles'] = 
+				hookArrayResult( 'stylesloaded' )['styles'] ?? $s;
+				
 				break;
 				
 			case 'scripts':
-				$s = config( 'default_scripts', \DEFAULT_SCRIPTS );
-				$store['scripts']	= \is_array( $s ) ? $s : 
+				$s	= config( 'default_scripts', \DEFAULT_SCRIPTS );
+				$s	= \is_array( $s ) ? $s : 
 				linePresets( 
 					'scripts', 
 					'script_limit', 
 					\SCRIPT_LIMIT,
 					$s
 				);
+				
+				// Merge plugin script files
+				hook( [ 'scriptsloaded', [ 'scripts' => $s ] ] );
+				$store['scripts'] = 
+				hookArrayResult( 'scriptsloaded' )['scripts'] ?? $s;
+				
 				break;
 			
 			case 'meta':
 				// Load custom meta tags
-				$meta = config( 'default_meta', \DEFAULT_META );
-				
-				$store['meta']		= 
+				$meta	= config( 'default_meta', \DEFAULT_META );
+				$meta	= 
 					\is_string( $meta ) ? decode( $meta ) : 
 						[ 'meta' => $meta ];
+				
+				// Merge plugin meta tags
+				hook( [ 'metaloaded', [ 'meta' => $meta ] ] );
+				$store['meta'] = 
+				hookArrayResult( 'metaloaded' )['meta'] ?? $meta;
+				
 				break;
 			
 			default:
@@ -3931,6 +3948,25 @@ function removeClass( string $name, string $value ) {
 }
 
 /**
+ *  URL and associated nonce extraction helper
+ *  
+ *  @param string	$path	URL|nonce formatted string
+ *  @return array
+ */
+function splitUrlNonce( string $path ) : array {
+	if ( false === \strpos( $path, '|' ) ) {
+		return [ 'url' => \trim( $path ), 'nonce' => '' ];
+	}
+	
+	$u	= \strstr( $r, '|', true );
+	$n	= \strstr( $r, '|' );
+	return [ 
+		'url'	=> ( false === $n ) ? '' : \trim( $u ), 
+		'nonce'	=> ( false === $n ) ? '' : \trim( $n, '| ' )
+	];
+}
+
+/**
  *  Special tag rendering helper (scripts, links etc...)
  *  
  *  @param string	$tpl	Rendering template
@@ -3964,7 +4000,7 @@ function regionTags(
 		default:
 			foreach( $rg as $r ) {
 				$rgo .= 
-				render( $tag, [ 'url' => $r ] );
+				render( $tag, splitUrlNonce( $r ) );
 			}
 	
 	}
@@ -7208,6 +7244,10 @@ function securityPolicy( string $policy ) : string {
 	if ( !isset( $p ) ) {
 		$p = 
 		config( 'security_policy', \SECURITY_POLICY, 'json' );
+		
+		// Merge custom content security policy
+		hook( [ 'cspload', [ 'policy' => $p ] ] );
+		$p = hookArrayResult( 'cspload' )['policy'] ?? $p;
 	}
 	
 	switch ( $policy ) {
