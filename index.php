@@ -115,6 +115,9 @@ define( 'ERROR_VISIT',	'visitor_errors.log' );
 // Special notices and other messages that aren't errors but should be recorded
 define( 'NOTICE',	'notices.log' );
 
+// A log file created when Bareboard is first run with information about its enviornment
+define( 'STARTUP',	'startup.log' );
+
 
 /**
  *  Database constants
@@ -356,6 +359,10 @@ define( 'MAX_CHAT',	20 );
  *  Templates and customization
  */
 
+// When enabled, scripts with a nonce are embedded (for use with plugins)
+// This relies on the 'script-src' content security policy being set correctly
+define( 'NONCED_SCRIPTS',	0 );
+
 // List of stylesheets to load from SHARED_ASSETS (one per line)
 define( 'DEFAULT_STYLESHEETS',		<<<LINES
 {shared_assets}style.css
@@ -572,6 +579,14 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"code_wrap_classes"		: "",
 	"code_classes"			: "",
 	
+	"footnote_nav_classes"		: "footnotes",
+	"footnote_ul_classes"		: "",
+	"footnote_phrase_classes"	: "",
+	"footnote_s_classes"		: "",
+	"footnote_a_classes"		: "",
+	"footnote_ba_classes"		: "",
+	"footnote_def_classes"		: "",
+	
 	"form_classes"			: "",
 	"fieldset_classes"		: "",
 	"search_form_classes"		: "",
@@ -596,7 +611,17 @@ define( 'DEFAULT_CLASSES', <<<JSON
 	"submit_classes"		: "",
 	"alt_classes"			: "",
 	"warn_classes"			: "",
-	"action_classes"		: ""
+	"action_classes"		: "", 
+	
+	"table_classes"			: "",
+	"table_header_classes"		: "",
+	"table_body_classes"		: "",
+	"table_footer_classes"		: "",
+	"table_row_classes"		: "",
+	"table_row_odd_classes"		: "",
+	"table_row_even_classes"	: "",
+	"table_th_classes"		: "",
+	"table_td_classes"		: ""
 }
 JSON
 );
@@ -1813,6 +1838,68 @@ XML;
 
 
 /**
+ *  Table formatting
+ */
+
+// Table formatting
+$templates['tpl_table']		= <<<HTML
+<table class="{table_classes}">
+	<thead class="{table_header_classes}">{thead}</thead>
+	<tbody class="{table_body_classes}">{tbody}</tbody>
+	<tfoot class="{table_footer_classes}">{tfoot}</tfoot>
+</table>
+HTML;
+
+// Table without headers but with footers
+$templates['tpl_table_nh']	= <<<HTML
+<table class="{table_classes}">
+	<tbody class="{table_body_classes}">{tbody}</tbody>
+	<tfoot class="{table_footer_classes}">{tfoot}</tfoot>
+</table>
+HTML;
+
+// Table without footers but with headers
+$templates['tpl_table_nf']	= <<<HTML
+<table class="{table_classes}">
+	<thead class="{table_header_classes}">{thead}</thead>
+	<tbody class="{table_body_classes}">{tbody}</tbody>
+</table>
+HTML;
+
+// Table without heading or footers
+$templates['tpl_table_nh_nf']	= <<<HTML
+<table class="{table_classes}">
+	<tbody class="{table_body_classes}">{tbody}</tbody>
+</table>
+HTML;
+
+// Ordinary row 
+$templates['tpl_table_row']	= <<<HTML
+<tr class="{table_row_classes}">{cells}</tr>
+HTML;
+
+// Odd row
+$templates['tpl_table_row_odd']	= <<<HTML
+<tr class="{table_row_odd_classes}">{cells}</tr>
+HTML;
+
+// Even row
+$templates['tpl_table_row_even']= <<<HTML
+<tr class="{table_row_even_classes}">{cells}</tr>
+HTML;
+
+// Heading cell
+$templates['tpl_table_h_cell']	= <<<HTML
+<th class="{table_th_classes} {align}" align="{align}">{data}</th>
+HTML;
+
+// Ordinary cell 
+$templates['tpl_table_cell']	= <<<HTML
+<td class="{table_td_classes} {align}" align="{align}">{data}</td>
+HTML;
+
+
+/**
  *  Embeded media templates
  */
 
@@ -1854,8 +1941,9 @@ $templates['tpl_youtube']	= <<<HTML
 <div class="media">
 	<iframe width="560" height="315" frameborder="0" 
 		sandbox="allow-same-origin allow-scripts" 
-		src="https://www.youtube.com/embed/{src}" 
-		allowfullscreen></iframe>
+		src="https://www.youtube.com/embed/{src}?start={time}" 
+		allow="encrypted-media;picture-in-picture" 
+		loading="lazy" allowfullscreen></iframe>
 </div>
 HTML;
 
@@ -1865,6 +1953,7 @@ $templates['tpl_vimeo']		= <<<HTML
 	<iframe width="560" height="315" frameborder="0" 
 		sandbox="allow-same-origin allow-scripts" 
 		src="https://player.vimeo.com/video/{src}" 
+		allow="picture-in-picture" loading="lazy" 
 		allowfullscreen></iframe>
 </div>
 HTML;
@@ -1875,6 +1964,7 @@ $templates['tpl_peertube']	= <<<HTML
 	<iframe width="560" height="315" frameborder="0" 
 		sandbox="allow-same-origin allow-scripts" 
 		src="https://{src_host}/videos/embed/{src}" 
+		allow="picture-in-picture" loading="lazy" 
 		allowfullscreen></iframe>
 </div>
 HTML;
@@ -1885,6 +1975,7 @@ $templates['tpl_archiveorg']	= <<<HTML
 	<iframe width="560" height="315" frameborder="0" 
 		sandbox="allow-same-origin allow-scripts" 
 		src="https://archive.org/embed/{src}" 
+		allow="picture-in-picture" loading="lazy" 
 		allowfullscreen></iframe></div>
 HTML;
 
@@ -1894,9 +1985,22 @@ $templates['tpl_lbry']	= <<<HTML
 	<iframe width="560" height="315" frameborder="0" 
 		sandbox="allow-same-origin allow-scripts" 
 		src="https://{src_host}/$/embed/{slug}/{src}" 
+		allow="picture-in-picture" loading="lazy" 
 		allowfullscreen></iframe>
 </div>
 HTML;
+
+// Utreon video wrapper
+$templates['tpl_utreon']	= <<<HTML
+<div class="media">
+	<iframe width="560" height="315" frameborder="0" 
+		sandbox="allow-same-origin allow-scripts" 
+		allow="encrypted-media;picture-in-picture"
+		src="https://utreon.com/embed/{src}?t={time}" 
+		loading="lazy" allowfullscreen></iframe>
+</div>
+HTML;
+
 
 
 
@@ -1909,6 +2013,7 @@ HTML;
 // Meta, script, and stylesheet tag templates
 define( 'TPL_META_TAG',	'<meta name="{name}" content="{content}">' );
 define( 'TPL_SCRIPT_TAG', '<script src="{url}" nonce="{nonce}"></script>' );
+define( 'TPL_SCRIPT_NONCE_TAG', '<script src="{url}" nonce="{nonce}"></script>' );
 define( 'TPL_STYLE_TAG', '<link rel="stylesheet" href="{url}">' );
 
 /**
@@ -1973,6 +2078,7 @@ define( 'MSG_USER_EXISTS',	"User already exists" );
  */
 \date_default_timezone_set( 'UTC' );
 \ignore_user_abort( true );
+\register_shutdown_function( 'shutdown' );
 
 
 
@@ -2350,6 +2456,11 @@ function shutdown() {
 	
 	// Shutdown called
 	if ( empty( $args ) ) {
+		// Cleanup any session data
+		if ( \session_status() === \PHP_SESSION_ACTIVE ) {
+			\session_write_close();
+		}
+		
 		hook( [ 'shutdown', [] ] );
 		foreach( $registered as $k => $v ) {
 			if ( \is_array( $v ) ) {
@@ -2374,6 +2485,11 @@ function shutdown() {
  *  Guess if current request is secure
  */
 function isSecure() : bool {
+	static $secure;
+	if ( isset( $secure ) ) {
+		return $secure;
+	}
+	
 	$ssl	= $_SERVER['HTTPS'] ?? '0';
 	$frd	= 
 		$_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 
@@ -2385,11 +2501,14 @@ function isSecure() : bool {
 		0 === \strcasecmp( $ssl, '1' )		|| 
 		0 === \strcasecmp( $frd, 'https' )
 	) {
+		$secure = true;
 		return true;
 	}
 	
-	return 
-	( 443 == ( int ) ( $_SERVER['SERVER_PORT'] ?? 80 ) );
+	$secure = 
+	( 443 == ( int ) ( $_SERVER['SERVER_PORT'] ?? 80 ) ) ? 
+		true : false;
+	return $secure;
 }
 
 
@@ -2553,7 +2672,7 @@ function getLang() : array {
 	
 	// Sorting columns
 	$weight = \array_column( $found, 'weight' );
-	$locale	= \arary_column( $found, 'locale' );
+	$locale	= \array_column( $found, 'locale' );
 	
 	// Sort by weight priority, followed by locale
 	return
@@ -2954,6 +3073,74 @@ function logNotice( string $msg ) : bool {
 }
 
 /**
+ *  Startup environment logging
+ */
+function logStartup() {
+	$log = \CACHE . \STARTUP;
+	
+	if ( \file_exists( $log ) ) {
+		return;
+	}
+	// List of required and optional libraries
+	$lib	= [ 
+	'required' => [
+		'libxml_clear_errors'	=> 'libxml',
+		'mime_content_type'	=> 'fileinfo',
+		'iconv'			=> 'iconv'
+	],
+	'optional' => [ 
+		'mb_strlen'		=> 'mbstring', 
+		'normalizer_normalize'	=> 'intl', 
+		'tidy_repair_string'	=> 'tidy',
+		'imagecreatetruecolor'	=> 'GD',
+		'mail'			=> 'mail'
+	]];
+	
+	// Missing storage
+	$miss	= [ 'required' => [], 'optional' => [] ];
+	
+	// Check PDO too
+	if ( !defined( 'PDO::ATTR_DEFAULT_FETCH_MODE' ) ) {
+		$miss['required'][] = 'pdo-sqlite';
+	}
+	
+	// Log any missing required libraries
+	foreach ( $lib['required'] as $f => $name ) {
+		if ( !\function_exists( $f ) ) {
+			$miss['required'][] = $name;
+		}
+	}
+	// Optional libraries
+	foreach ( $lib['optional'] as $f => $name ) {
+		if ( !\function_exists( $f ) ) {
+			$miss['optional'][] = $name;
+		}
+	}
+	
+	if ( !empty( $miss['required'] ) ) {
+		$msg	= 
+		'These required library(ies) may be missing or disabled: ' . 
+			implode( ', ', $miss['required'] );
+		logMessage( 
+			$log, 
+			'date, time, s-comment',
+			truncate( unifySpaces( $msg ), 0, 2048 ) 
+		);
+	}
+	
+	if ( !empty( $miss['optional'] ) ) {
+		$msg	= 
+		'These recommended function(s) or library(ies) may be missing or disabled: ' . 
+			implode( ', ', $miss['optional'] );
+		logMessage( 
+			$log, 
+			'date, time, s-comment',
+			truncate( unifySpaces( $msg ), 0, 2048 ) 
+		);
+	}
+}
+
+/**
  *  Log visitor error
  *  
  *  @param int		$code	Error type
@@ -2982,8 +3169,7 @@ function visitorAbort() {
 		httpCode( 205 );
 	}
 	visitorError( 499, 'Client disconnect' );
-	shutdown( 'cleanup' );
-	shutdown();
+	die();
 }
 
 
@@ -3209,11 +3395,10 @@ function loadFile(
 	}
 	
 	if ( false !== \strpos( $data, '<?php' ) ) {
-		shutdown( 'cleanup' );
 		
 		// Prevent circular failure if config file contained the error
 		if ( 0 == \strcasecmp( $name, CONFIG ) ) {
-			shutdown();
+			die();
 		}
 		send( 500, \MSG_CODEDETECT );
 	}
@@ -3479,6 +3664,13 @@ function config(
 	string	$filter		= '' 
 ) {
 	$config = loadConfig( \CONFIG );
+	
+	// Set self-save
+	if ( !internalState( 'configsaveset' ) ) {
+		shutdown( 'saveConfig' );
+		internalState( 'configsaveset', true );
+	}
+	
 	switch( $type ) {
 		case 'int':
 		case 'integer':
@@ -3509,6 +3701,21 @@ function config(
 }
 
 /**
+ *  Check if a given hash scheme is valid
+ *  
+ *  @param string	$algo	Checking hash scheme
+ *  @param bool		$hmac	Check HMAC algo list if true
+ *  @return bool
+ */
+function validHashAlgo( string $algo, bool $hmac = false ) : bool {
+	return 
+	\in_array( 
+		$algo, 
+		( $hmac ? \hash_hmac_algos() : \hash_algos() )
+	) ? true : false;
+}
+
+/**
  *  Helper to determine if given hash algo exists or returns default
  *  
  *  @param string	$token		Configuration setting name
@@ -3528,12 +3735,8 @@ function hashAlgo(
 	}
 	
 	$ht		= config( $token, $default );
+	$algos[$t]	= validHashAlgo( $ht, $hmac ) ? $ht : $default;
 	
-	$algos[$t]	= 
-		\in_array( $ht, 
-			( $hmac ? \hash_hmac_algos() : \hash_algos() ) 
-		) ? $ht : $default;
-		
 	return $algos[$t];	
 }
 
@@ -4051,7 +4254,10 @@ function renderRegions( string $tpl ) : string {
 	$tpl	= 
 	regionTags( $tpl, '{stylesheets}', \TPL_STYLE_TAG, 'styles' );
 	
+	// Use nonced script tag template if that setting is enabled
 	$tpl	= 
+	config( 'nonced_scripts', \NONCED_SCRIPTS, 'bool' ) ?
+	regionTags( $tpl, '{body_js}', \TPL_SCRIPT_NONCE_TAG, 'scripts' ) : 
 	regionTags( $tpl, '{body_js}', \TPL_SCRIPT_TAG, 'scripts' );
 	
 	$tpl	= 
@@ -4227,6 +4433,7 @@ function timeZoneOffset() : int {
 		$ot = $dz->getOffset( $dt );
 		
 	} catch( \Exception $e ) { // Default fallback
+		shutdown( 'logError', 'Invalid timezone set ' . $tz );
 		$dz = new \DateTimeZone( 'America/New_York' );
 		$ot = $dz->getOffset( $dt );
 	}
@@ -4414,6 +4621,13 @@ function installSQL( \PDO $db, string $dsn ) {
  */
 function getDb( string $dsn, string $mode = 'get' ) {
 	static $db	= [];
+	
+	// Set self-cleanup
+	if ( !internalState( 'dbcleanupset' ) ) {
+		shutdown( 'statement', [ null, null ] );
+		shutdown( 'getDb', [ '', 'closeAll' ] );
+		internalState( 'dbcleanupset', true );
+	}
 	
 	switch( $mode ) {
 		case 'close':	
@@ -4824,20 +5038,6 @@ function batchIntParams(
 	return $up;
 }
 
-/**
- *  Close the session and any open connections
- */
-function cleanup() {
-	hook( [ 'cleanup', [] ] );
-	if ( \session_status() === \PHP_SESSION_ACTIVE ) {
-		\session_write_close();
-	}
-	
-	statement( null, null );
-	getDb( '', 'closeall' );
-	saveConfig();
-}
-
 
 /**
  *  Caching
@@ -4925,9 +5125,6 @@ function saveCache( string $uri, string $content ) {
 		], 
 		\CACHE_DATA 
 	);
-	
-	// Schedule cleanup
-	shutdown( 'cleanup' );
 }
 
 
@@ -5414,18 +5611,15 @@ function sessionThrottle() {
 		// Send Too Many Requests
 		case SESSION_STATE_HEAVY:
 			visitorError( 429, 'Requests' );
-			shutdown( 'cleanup' );
 			shutdown( 'sleep', 20 );
 			sendError( 429, errorLang( "toomany", \MSG_TOOMANY ) );
 			
 		// Send Not Modified for the rest
 		case SESSION_STATE_MEDIUM:
-			shutdown( 'cleanup' );
 			shutdown( 'sleep', 10 );
 			send( 304 );
 			
 		case SESSION_STATE_LIGHT:
-			shutdown( 'cleanup' );
 			shutdown( 'sleep', 5 );
 			send( 304 );
 	}
@@ -6319,7 +6513,7 @@ function html(
 		if ( false !== $e ) {
 			shutdown( 
 				'logError', 
-				[ $e->message ?? 'Error loading DOMDocument' ]
+				$e->message ?? 'Error loading DOMDocument'
 			);
 		}
 		
@@ -6629,6 +6823,185 @@ function embeds( string $html, string $prefix = ''  ) : string {
 	\preg_replace_callback_array( $media, $html );
 }
 
+
+/**
+ *  Convert row string to list of cells
+ *  
+ *  @param string	$row		Matched plain text row cells
+ *  @param bool		$is_align	This is an alignment row if true
+ *  @return array
+ */
+function tableCells( string $row, bool $is_align = false ) : array {
+	$row = \trim( $row, '|' );
+	
+	// Split by vertical pipes, skipping any escaped
+	$c =  empty( $row ) ? [] : 
+	\preg_split( 
+		'/[^\\\\]\|' . ( $is_align ? '|[^\\\\]\+/' : '/' ), $row
+	);
+	return ( false === $c )? [] : $c;
+}
+
+/**
+ *  Format table row with each cell aligned as designated
+ *   
+ *  @param array	$cells	Column cells in a single table row
+ *  @param array	$align	Formatting alignment definition
+ *  @param bool		$tpl	Cell rendering template
+ *  @param int		$oe	Optional odd/even row selector
+ *  @return string
+ */
+function tableRow( array $cells, array $align, string $tpl, int $oe = 0 ) : string {
+	if ( empty( $cells ) ) {
+		return 
+		render( template( 'tpl_table_row' ), [ 'cells' => ''] );
+	}
+	
+	$i	= 0;		// Row cell counter
+	$cells	= 
+	\array_map( function( $r ) use ( $align, $tpl, &$i ) {
+		switch ( $align[$i] ?? '' ) {
+			// Left align
+			case 'l':
+				$r = render( $tpl, [ 
+					'align'	=> 'left',
+					'data'	=> $r
+				] );
+				break;
+			
+			// Center align
+			case 'c': 
+				$r = render( $tpl, [ 
+					'align'	=> 'center',
+					'data'	=> $r
+				] );
+				break;
+			
+			// Right align
+			case 'r':
+				$r = render( $tpl, [ 
+					'align'	=> 'right',
+					'data'	=> $r
+				] );
+				break;
+			
+			// No alignment
+			default:
+				$r = render( $tpl, [ 
+					'align'	=> '',
+					'data'	=> $r
+				] );
+		}
+		
+		$i++;
+		return $r;
+		
+	}, $cells );
+	
+	// No Odd/Even
+	if ( empty( $oe ) ) {
+		return 
+		render( template( 'tpl_table_row' ), [ 
+			'cells' => \implode( '', $cells ) 
+		] );
+	}
+	
+	return ( 0 == $oe % 2 ) ?
+	render( template( 'tpl_table_row_even' ), [ 
+		'cells' => \implode( '', $cells ) 
+	] ) :
+	render( template( 'tpl_table_row_odd' ), [ 
+		'cells' => \implode( '', $cells ) 
+	] );
+}
+
+/**
+ *  Table formatting helper
+ *  
+ *  @param array	$m	Regex found match
+ *  @return string
+ */
+function tableBuild( array $m ) : string {
+	// Table cell alignment definition
+	$align = 
+	\array_map( function( $a ) {
+		$a = \trim( $a );
+		
+		return 
+		empty( $a ) ? '' : (
+			// Left align?
+			\str_starts_with( $a, ':' ) ? (
+				// And right? Center
+				\str_ends_with( $a, ':' ) ? 'c' : 'l' // Or left only
+			) : (
+				// Right only?
+				\str_ends_with( $a, ':' ) ? 'r' : '' // Or nothing
+			) 
+		);
+	}, tableCells( $m['align'] ?? '' , true ) );
+		
+	// Table column headers
+	$headers	= 
+	tableRow( 
+		tableCells( $m['headers'] ?? '' ), 
+		$align, 
+		template( 'tpl_table_h_cell' )
+	);
+	
+	// Table column footers
+	$footers	= 
+	tableRow( 
+		tableCells( $m['footers'] ?? '' ), 
+		$align,
+		template( 'tpl_table_cell' )
+	);
+	
+	// Odd/Even rows
+	$oe	= 1;
+	
+	// Table body rows
+	$rows	= 
+	\array_map( function( $r ) use ( $align, &$oe ) {
+		return 
+		tableRow( 
+			tableCells( $r ), 
+			$align, 
+			template( 'tpl_table_cell' ),
+			$oe
+		);
+		$oe++;
+	}, lines( $m['rows'] ?? '', -1, true ) );
+	
+	$body = \implode( '', $rows );
+	
+	if ( !empty( $headers ) && !empty( $footers ) ) {
+		return 
+		render( template( 'tpl_table' ), [ 
+			'thead' 		=> $headers,
+			'tfoot' 		=> $footers,
+			'tbody' 		=> $body
+		] );
+		
+	} elseif ( empty( $headers ) && !empty( $footers ) ) {
+		return 
+		render( template( 'tpl_table_nf' ), [ 
+			'tfoot' 		=> $footers,
+			'tbody'			=> $body
+		] );
+	} elseif ( !empty( $headers ) && empty( $footers ) ) {
+		return 
+		render( template( 'tpl_table_nh' ), [ 
+			'thead' 		=> $headers,
+			'tbody'			=> $body
+		] );
+	}
+	
+	return 
+	render( template( 'tpl_table_nh_nf' ), [ 
+		'tbody' => $body
+	] );
+}
+
 /**
  *  Convert Markdown formatted text into HTML tags
  *  
@@ -6642,8 +7015,13 @@ function embeds( string $html, string $prefix = ''  ) : string {
 function markdown(
 	string	$html,
 	string	$prefix = '' 
-) {
+) : string {
 	static $filters;
+	
+	// Running footnotes
+	static $running_f	= 0;
+	$footnotes		= [];
+	$fmarkers		= [];
 	
 	if ( empty( $filters ) ) {
 		$filters	= 
@@ -6748,6 +7126,47 @@ function markdown(
 			\strtr( template( 'tpl_codeinline' ), [ 
 				'{code}' => entities( \trim( $m[1] ), false, false )
 			] );
+		},
+		
+		// Footnote
+		'/(?:\[\^)(?<phrase>[[:alnum:]_\-]*)(?:\])((?:\:)(?:\s+)?' . 
+		'(?<footnote>[[:print:]]*))?/si' =>
+		function( $m ) use ( &$footnotes, &$running_f, &$fmarkers ) {
+			
+			// Definition missing? Make a placeholder
+			if ( empty( $m['footnote'] ) ) {
+				// Total running footnotes
+				$running_f++;
+				
+				// Create placeholder slug
+				$slug		= 
+				'{footnote_marker_' . $running_f . '-' . 
+				slugify( ( string ) $m['phrase'] ) . '}';
+				
+				// Create list for this phrase
+				$fmarkers[$m['phrase']] ??= [];
+				
+				// Placeholder slug and link text phrase
+				$fmarkers[$m['phrase']][] = $slug;
+				return $slug;
+			}
+			
+			// Footnote definition made separately
+			$footnotes[$m['phrase']] = [
+				'footnote'	=> $m['footnote'],
+				'markers'	=> 
+					$fmarkers[$m['phrase']] ?? []
+			];
+			return '';
+		},
+		
+		// Tables
+		'/(?:\|(?<headers>[^\n]+)\|\n{1}(?:[\+\:\|\-])' . 
+		'(?<align>[\+\:\|\-]{1,})(?:[\|\+]\r?\n){1})?' . 
+		'(?<rows>(?:\|[^\n=]+\|\n){1,})(?:\|[=\|]+\|\n\|' . 
+		'(?<footers>[^\n]+)(?:\|\n))?/m'	=>
+		function( $m ) {
+			return empty( $m ) ? '' : tableBuild( $m );
 		}
 		];
 		
@@ -6757,8 +7176,10 @@ function markdown(
 		hookArrayResult( 'markdownfilter' )['filters'] ?? $filters;
 	}
 	
-	return
-	\preg_replace_callback_array( $filters, $html );
+	$html	= \preg_replace_callback_array( $filters, $html );
+	
+	// Parse out footnotes, if any
+	return formatFootnotes( $html, $footnotes );
 }
 
 /**
@@ -7418,6 +7839,10 @@ function httpCode( int $code ) {
 	
 	// Special cases
 	switch( $code ) {
+		case 416:
+			\header( "$prot $code " . 'Range Not Satisfiable' );
+			return;
+			
 		case 425:
 			\header( "$prot $code " . 'Too Early' );
 			return;
@@ -7492,6 +7917,9 @@ function formatSites( array $sites ) : array {
 			// Slash basepath
 			$b['basepath'] = 
 				slashPath( $b['basepath'] ?? '/' );
+		
+			// Set active mode if not set
+			$b['is_active'] ??= 1;
 			
 			// Set maintenance mode
 			$b['is_maintenance'] ??= 0;
@@ -7509,7 +7937,6 @@ function formatSites( array $sites ) : array {
 		$se[$host] = $f;
 	}
 	
-	\natcasesort( $se );
 	return $se;
 }
 
@@ -7762,7 +8189,7 @@ function send(
 	echo $content;
 	
 	// End
-	shutdown();
+	die();
 }
 
 /**
@@ -7785,7 +8212,7 @@ function sendErrorFile( string $path, int $code ) {
 	] );
 	sendFilePrep( $path, $code );
 	sendFileFinish( $path, true );
-	shutdown();
+	die();
 }
 
 /**
@@ -7838,7 +8265,6 @@ function sendError( int $code, $body ) {
 	
 	// Send custom errors
 	if ( !empty( $html ) ) {
-		shutdown( 'cleanup' );
 		send( $code, $html );
 	}
 	
@@ -7849,7 +8275,6 @@ function sendError( int $code, $body ) {
 		'code'		=> $code,
 		'body'		=> $body 
 	];
-	shutdown( 'cleanup' );
 	send( $code, render( template( 'tpl_error_page' ), $params ) );
 }
 
@@ -7878,7 +8303,6 @@ function sendOverride( string $event, bool $feed = false ) {
 		return;
 	}
 	
-	shutdown( 'cleanup' );
 	send( 
 		( int ) ( $sent['code'] ?? 200 ), 
 		$html, 
@@ -8048,6 +8472,43 @@ function detectMime( string $path ) : string {
 }
 
 /**
+ *  Create a digest hash of a file
+ *  
+ *  @param string	$path	File path
+ *  @param string	$algo	Hashing scheme
+ */
+function fileDigest( string $path, string $algo	= 'sha384' ) : string {
+	static $done	= [];
+	
+	if ( empty( $path ) || empty( $algo ) ) {
+		return '';
+	}
+	
+	$key = $algo . $path;
+	
+	if ( \array_key_exists( $key, $done ) ) {
+		return $done[$key];
+	}
+	
+	if ( !validHashAlgo( $algo, false ) ) {
+		return '';
+	}
+	if ( 
+		empty( $path ) || 
+		!\is_file( $path ) || 
+		!\is_readable( $path ) 
+	) {
+		return '';
+	}
+	
+	$done[$key] = 
+	\base64_encode( \hash_file( $algo, $path, true ) );
+	
+	return $done[$key];
+}
+
+
+/**
  *  Prepare to send a file instead of an HTTP response
  *  
  *  @param string	$path		File path to send
@@ -8122,11 +8583,16 @@ function closeStream( &$stream ) {
  *  @param resource	$stream		Open file stream
  *  @param int		$int		Starting offset
  *  @param int		$end		Ending offset or end of file
+ *  @param callable	$flh		Flushing action
+ *  @param callable	$abr		Abort action
  */
-function streamChunks( &$stream, int $start, int $end ) {
+function streamChunks( &$stream, int $start, int $end, $flh, $abr ) {
 	// Default chunk size
 	$csize	= config( 'stream_chunk_size', \STREAM_CHUNK_SIZE, 'int' );
 	$sent	= 0;
+	
+	$is_flh	= \is_callable( $flh );
+	$is_abr	= \is_callable( $abr );
 	
 	fseek( $stream, $start );
 	
@@ -8135,12 +8601,17 @@ function streamChunks( &$stream, int $start, int $end ) {
 		// Check for aborted connection between flushes
 		if ( \connection_aborted() ) {
 			closeStream( $stream );
-			visitorAbort();
+			if ( $is_abr ) {
+				\call_user_func( $abr );
+			}
+			break;
 		}
 		
 		// End reached
 		if ( $sent >= $end ) {
-			flushOutput();
+			if ( $is_flh ) {
+				\call_user_func( $flh );
+			}
 			break;
 		}
 		
@@ -8157,7 +8628,9 @@ function streamChunks( &$stream, int $start, int $end ) {
 		
 		$sent += strsize( $buf );
 		
-		flushOutput();
+		if ( $is_flh ) {
+			\call_user_func( $flh );
+		}
 	}
 }
 
@@ -8183,7 +8656,7 @@ function sendFileFinish( $path ) {
 				// Don't send error or this may loop
 				// Error handlers also use this function
 				shutdown( 'logError', 'Error opening ' . $path );
-				shutdown();
+				die();
 			}
 		}
 	
@@ -8204,9 +8677,6 @@ function sendFileFinish( $path ) {
 		}
 	}
 	
-	// Cleanup and flush before readfile
-	cleanup();
-	
 	// Send any headers and end buffering
 	flushOutput( true );
 	
@@ -8215,7 +8685,7 @@ function sendFileFinish( $path ) {
 			\readfile( $path );
 			return;
 		}
-		streamChunks( $stream, 0, $fsize );
+		streamChunks( $stream, 0, $fsize, 'flushOutput', 'visitorAbort' );
 		closeStream( $stream );
 	}
 }
@@ -8446,8 +8916,7 @@ function handleHead( string $path, array $routes ) {
 	}
 	
 	// Done
-	shutdown( 'cleanup' );
-	shutdown();
+	die();
 }
 
 /**
@@ -8463,8 +8932,7 @@ function handleOptions() {
 	setCacheExp( 604800 );
 	
 	// Done
-	shutdown( 'cleanup' );
-	shutdown();
+	die();
 }
 
 /**
@@ -8480,7 +8948,6 @@ function handleCache( string $path ) {
 	}
 	
 	// If URI is already saved, send contents and exit
-	shutdown( 'cleanup' );
 	
 	// Is this a feed?
 	if ( 0 === \strcasecmp( \basename( $path ), 'feed' ) ) {
@@ -8530,8 +8997,7 @@ function methodPreParse( string $verb, string $path, array $routes ) {
 		case 'get':
 			// Try to send file, if it's a file
 			if ( fileRequest( $verb, $path ) ) {
-				shutdown( 'cleanup' );
-				shutdown();
+				die();
 			
 			// Try to send cache if it's available
 			} else {
@@ -8556,7 +9022,6 @@ function methodPreParse( string $verb, string $path, array $routes ) {
 		// Nothing else implemented
 		default:
 			visitorError( 405, 'Method' );
-			shutdown( 'cleanup' );
 			send( 405 );
 	}
 }
@@ -8606,7 +9071,6 @@ function request( string $event, array $hook, array $params ) : array {
 	$lurl	= config( 'max_url_size', \MAX_URL_SIZE, 'int' );
 	if ( strsize( $path ) > $lurl ) {
 		visitorError( 414, 'Path' );
-		shutdown( 'cleanup' );
 		send( 414 );
 	}
 	
@@ -8976,8 +9440,6 @@ function sendFileRange( string $path, bool $dosend ) : bool {
 	
 	\header( "Content-Length: {$totals}", true );
 	
-	cleanup();
-	
 	// Send any headers and end buffering
 	flushOutput( true );
 	
@@ -8996,7 +9458,7 @@ function sendFileRange( string $path, bool $dosend ) : bool {
 		}
 		
 		$limit = ( $r[1] > -1 ) ? $r[1] + 1 : $fsize;
-		streamChunks( $stream, $r[0], $limit );
+		streamChunks( $stream, $r[0], $limit, 'flushOutput', 'visitorAbort' );
 	}
 	
 	closeStream( $stream );
