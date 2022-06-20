@@ -25,6 +25,24 @@
 	"about_classes"			: "content",
 	"about_wrap_classes"		: "",
 	
+	"forum_cat_idx_wrap_classes"	: "",
+	"forum_cat_idx_classes"		: "",
+	"forum_cat_idx_h_classes"	: "",
+	"forum_idx_wrap_classes"	: "",
+	"forum_idx_classes"		: "",
+	"forum_idx_heading_classes"	: "",
+	"forum_idx_h_classes"		: "",
+	"forum_idx_a_classes"		: "",
+	"forum_idx_desc_classes"	: "",
+	"forum_idx_subs_classes"	: "",
+	"forum_idx_stats_classes"	: "",
+	"forum_idx_stats_p_classes"	: "",
+	"forum_idx_stats_t_classes"	: "",
+	"forum_idx_last_classes"	: "",
+	"forum_idx_stats_l_classes"	: "",
+	"forum_idx_author_a_classes"	: "",
+	"forum_idx_stats_l_classes"	: "",
+	
 	"post_index_wrap_classes"	: "content",
 	"post_index_ul_wrap_classes"	: "index",
 	"post_index_header_classes"	: "",
@@ -98,7 +116,8 @@
 	"nav_home_link_classes"		: "",
 	"nav_home_link_a_classes"	: "",
 	
-	"nav_current_classes"		: "",
+	"nav_classes"			: "",
+	"nav_a_classes"			: "",
 	"nav_current_s_classes"		: "",
 	"nav_prev_classes"		: "",
 	"nav_prev_a_classes"		: "",
@@ -147,7 +166,17 @@
 	"submit_classes"		: "f6 f5-l button-reset tc bn pv2 white bg-blue hover-bg-black hover-white pointer",
 	"alt_classes"			: "f6 f5-l button-reset tc bn pv2 white bg-orange hover-bg-black hover-white pointer",
 	"warn_classes"			: "f6 f5-l button-reset tc bn pv2 white bg-red hover-bg-black hover-black pointer",
-	"action_classes"		: "f6 f5-l button-reset tc bn pv2 white bg-green hover-bg-black hover-white pointer"
+	"action_classes"		: "f6 f5-l button-reset tc bn pv2 white bg-green hover-bg-black hover-white pointer", 
+	
+	"table_classes"			: "f6 w-100 mw8 center",
+	"table_header_classes"		: "",
+	"table_body_classes"		: "lh-copy",
+	"table_footer_classes"		: "",
+	"table_row_classes"		: "",
+	"table_row_odd_classes"		: "stripe-dark",
+	"table_row_even_classes"	: "stripe-dark",
+	"table_th_classes"		: "fw6 bb b--black-20 tl pa3 bg-white",
+	"table_td_classes"		: "pa3"
 }
 
 }
